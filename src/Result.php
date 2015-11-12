@@ -8,8 +8,9 @@ namespace Parco;
 /**
  * A parse result.
  */
-class Result
+class Result implements Positional
 {
+    use Position;
 
     /**
      * Whether parse was successful.
@@ -19,9 +20,9 @@ class Result
     public $successful;
 
     /**
-     * Result or null if unsuccessful.
+     * Result if successful.
      *
-     * @var mixed|null
+     * @var mixed
      */
     public $result;
 
@@ -33,20 +34,30 @@ class Result
     public $nextInput;
 
     /**
+     * Failure message if unsuccessful.
+     *
+     * @var string|null
+     */
+    public $message;
+
+    /**
      * Construct parse result.
      *
      * @param bool $successful
      *            Whether parser was successful;
-     * @param mixed|null $result
-     *            Result or null if unsuccessful.
+     * @param mixed $result
+     *            Result if successful.
      * @param array $nextInput
      *            Remaining input.
+     * @param string|null $message
+     *            Failure message if unsuccessful.
      */
-    public function __construct($successful, $result, array $nextInput)
+    public function __construct($successful, $result, array $nextInput, $message = null)
     {
         $this->successful = $successful;
         $this->result = $result;
         $this->nextInput = $nextInput;
+        $this->message = $message;
     }
 
     /**
@@ -56,9 +67,10 @@ class Result
      */
     public function get()
     {
-        if (! isset($this->successful))
+        if (! $this->successful) {
             // TODO: replace with something meaninful
             throw new \Exception('no value');
+        }
         return $this->result;
     }
 }
