@@ -7,7 +7,8 @@ namespace Parco;
 
 interface Positional
 {
+
     public function getPosition();
-    
-    public function setPosition($pos);
+
+    public function setPosition(array $pos);
 }
