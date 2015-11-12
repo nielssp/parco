@@ -13,7 +13,7 @@ class FuncParser extends Parser
 
     private $func;
 
-    public function __construct($func)
+    public function __construct(callable $func)
     {
         $this->func = $func;
     }

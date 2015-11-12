@@ -28,6 +28,16 @@ abstract class Parser
         });
     }
 
+    public function map(callable $f)
+    {
+        return new FuncParser(function (array $input) use($f) {
+            $result = $this->parse($input);
+            if (! $result->successful)
+                return $result;
+            return new Result(true, $f($result->result), $result->nextInput);
+        });
+    }
+
     public function conc(Parser $other)
     {
         return new FuncParser(function (array $input) use($other) {
@@ -37,7 +47,10 @@ abstract class Parser
             $b = $other->parse($a->nextInput);
             if (! $b->successful)
                 return $b;
-            return new Result(true, array($a->result, $b->result), $b->nextInput);
+            return new Result(true, array(
+                $a->result,
+                $b->result
+            ), $b->nextInput);
         });
     }
 
