@@ -6,22 +6,30 @@
 namespace Parco;
 
 /**
- * A parser.
+ * A parser constructed from a parse function.
  */
 class FuncParser extends Parser
 {
 
+    /**
+     * @var callable
+     */
     private $func;
 
+    /**
+     * Construct parser from parse function.
+     * 
+     * @param callable $func
+     *            Parse function, see {@see Parser::parse) for expected function
+     *            signature.
+     */
     public function __construct(callable $func)
     {
         $this->func = $func;
     }
 
     /**
-     *
      * {@inheritdoc}
-     *
      */
     public function parse(array $input, array $pos)
     {
