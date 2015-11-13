@@ -7,7 +7,6 @@ namespace Parco\Combinator;
 
 use Parco\Parser;
 use Parco\FuncParser;
-use Parco\Result;
 use Parco\Success;
 use Parco\Failure;
 
@@ -17,6 +16,37 @@ use Parco\Failure;
  */
 trait Parsers
 {
+
+    /**
+     * A parser that accepts only the given element.
+     *
+     * `elem($e)` is a parser that succeeds if the first element in the input
+     * is equal to `$e`.
+     *
+     * @param mixed $e
+     *            An element.
+     * @return FuncParser An element parser.
+     */
+    public function elem($e)
+    {
+        return new FuncParser(function (array $input, array $pos) use ($e) {
+            if (! count($input)) {
+                return new Failure(
+                    'unexpected end of input, expected "' . $e . '"',
+                    $input, $pos
+                );
+            }
+            if ($input[0] != $e) {
+                return new Failure(
+                    'unexpected "' . $input[0] . '", expected "' . $e . '"',
+                    $input, $pos
+                );
+            }
+            $input = array_slice($input, 1);
+            $pos[1]++;
+            return new Success($e, $input, $pos);
+        });
+    }
 
     /**
      * Optional parser.
@@ -252,7 +282,7 @@ trait Parsers
                 $input = $r->nextInput;
                 $pos = $r->nextPos;
             }
-            return new Succcess($list, $input, $pos);
+            return new Success($list, $input, $pos);
         });
     }
 

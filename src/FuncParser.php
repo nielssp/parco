@@ -33,6 +33,6 @@ class FuncParser extends Parser
      */
     public function parse(array $input, array $pos)
     {
-        return call_user_func($this->func, $input, $Pos);
+        return call_user_func($this->func, $input, $pos);
     }
 }

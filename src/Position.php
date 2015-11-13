@@ -45,7 +45,7 @@ trait Position
      * 
      * @return int Line number (starting from 1).
      */
-    public function getLine()
+    public function posLine()
     {
         return $this->pos[0];
     }
@@ -55,7 +55,7 @@ trait Position
      *
      * @return int Column number (starting from 1).
      */
-    public function getColumn()
+    public function posColumn()
     {
         return $this->pos[1];
     }

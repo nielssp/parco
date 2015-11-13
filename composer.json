@@ -19,6 +19,9 @@
   "autoload": {
     "psr-4": {"Parco\\": "src/"}
   },
+  "autoload-dev": {
+    "psr-4": { "Parco\\": "tests/" }
+  },
   "require": {
     "php": ">=5.4.0"
   },
