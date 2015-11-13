@@ -67,7 +67,7 @@ abstract class Parser
     /**
      * Sequential composition of two parsers.
      *
-     * `$p->seq($p)` is a parser that uses `$p` on the input followed by `$q`
+     * `$p->seq($q)` is a parser that uses `$p` on the input followed by `$q`
      * on the remaining input. The parser fails if either $p or $q fails. The
      * result is an array containing both results.
      *
@@ -94,7 +94,7 @@ abstract class Parser
     /**
      * Sequential composition of two parsers returning only the left result.
      *
-     * `$p->seq($p)` is a parser that uses `$p` on the input followed by `$q`
+     * `$p->seq($q)` is a parser that uses `$p` on the input followed by `$q`
      * on the remaining input. The parser fails if either $p or $q fails. The
      * result is the result of `$p`.
      *
@@ -118,7 +118,7 @@ abstract class Parser
     /**
      * Sequential composition of two parsers returning only the right result.
      *
-     * `$p->seq($p)` is a parser that uses `$p` on the input followed by `$q`
+     * `$p->seq($q)` is a parser that uses `$p` on the input followed by `$q`
      * on the remaining input. The parser fails if either $p or $q fails. The
      * result is the result of `$q`.
      *

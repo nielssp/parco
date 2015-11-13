@@ -20,7 +20,7 @@ class FuncParser extends Parser
      * Construct parser from parse function.
      * 
      * @param callable $func
-     *            Parse function, see {@see Parser::parse) for expected function
+     *            Parse function, see {@see parse} for expected function
      *            signature.
      */
     public function __construct(callable $func)
