@@ -33,18 +33,19 @@ trait Parsers
             if (! count($input)) {
                 return new Failure(
                     'unexpected end of input, expected "' . $e . '"',
-                    $input, $pos
+                    $pos, $input, $pos
                 );
             }
             if ($input[0] != $e) {
                 return new Failure(
                     'unexpected "' . $input[0] . '", expected "' . $e . '"',
-                    $input, $pos
+                    $pos, $input, $pos
                 );
             }
             $input = array_slice($input, 1);
-            $pos[1]++;
-            return new Success($e, $input, $pos);
+            $nextPos = $pos;
+            $nextPos[1]++;
+            return new Success($e, $pos, $input, $nextPos);
         });
     }
 
@@ -64,7 +65,7 @@ trait Parsers
             $r = $p->parse($input, $pos);
             if ($r->successful)
                 return $r;
-            return new Success(null, $input, $pos);
+            return new Success(null, $pos, $input, $pos);
         });
     }
 
@@ -83,8 +84,8 @@ trait Parsers
         return new FuncParser(function (array $input, array $pos) use ($p) {
             $r = $p->parse($input, $pos);
             if ($r->successful)
-                return new Failure(null, $input, $pos);
-            return new Success(null, $input, $pos);
+                return new Failure(null, $pos, $input, $pos);
+            return new Success(null, $pos, $input, $pos);
         });
     }
 
@@ -102,15 +103,16 @@ trait Parsers
     {
         return new FuncParser(function (array $input, array $pos) use ($p) {
             $list = array();
+            $nextPos = $pos;
             while (true) {
-                $r = $p->parse($input, $pos);
+                $r = $p->parse($input, $nextPos);
                 if (! $r->successful)
                     break;
                 $list[] = $r->result;
                 $input = $r->nextInput;
-                $pos = $r->nextPos;
+                $nextPos = $r->nextPos;
             }
-            return new Success($list, $input, $pos);
+            return new Success($list, $pos, $input, $nextPos);
         });
     }
 
@@ -134,12 +136,12 @@ trait Parsers
             $list = array();
             $r = $p->parse($input, $pos);
             if (! $r->successful)
-                return new Success($list, $input, $pos);
+                return new Success($list, $pos, $input, $pos);
             $list[] = $r->result;
             $input = $r->nextInput;
-            $pos = $r->nextPos;
+            $nextPos = $r->nextPos;
             while (true) {
-                $s = $sep->parse($input, $pos);
+                $s = $sep->parse($input, $nextPos);
                 if (! $s->successful)
                     break;
                 $r = $p->parse($s->nextInput, $s->nextPos);
@@ -147,9 +149,9 @@ trait Parsers
                     break;
                 $list[] = $r->result;
                 $input = $r->nextInput;
-                $pos = $r->nextPos;
+                $nextPos = $r->nextPos;
             }
-            return new Success($list, $input, $pos);
+            return new Success($list, $pos, $input, $nextPos);
         });
     }
 
@@ -168,8 +170,9 @@ trait Parsers
     {
         return new FuncParser(function (array $input, array $pos) use ($p) {
             $list = array();
+            $nextPos = $pos;
             do {
-                $r = $p->parse($input, $pos);
+                $r = $p->parse($input, $nextPos);
                 if (! $r->successful) {
                     if (! count($list))
                         return $r;
@@ -177,9 +180,9 @@ trait Parsers
                 }
                 $list[] = $r->result;
                 $input = $r->nextInput;
-                $pos = $r->nextPos;
+                $nextPos = $r->nextPos;
             } while (true);
-            return new Success($list, $input, $pos);
+            return new Success($list, $pos, $input, $nextPos);
         });
     }
 
@@ -206,9 +209,9 @@ trait Parsers
                 return $r;
             $list[] = $r->result;
             $input = $r->nextInput;
-            $pos = $r->nextPos;
+            $nextPos = $r->nextPos;
             while (true) {
-                $s = $sep->parse($input, $pos);
+                $s = $sep->parse($input, $nextPos);
                 if (! $s->successful)
                     break;
                 $r = $p->parse($s->nextInput, $s->nextPos);
@@ -216,9 +219,9 @@ trait Parsers
                     break;
                 $list[] = $r->result;
                 $input = $r->nextInput;
-                $pos = $r->nextPos;
+                $nextPos = $r->nextPos;
             }
-            return new Success($list, $input, $pos);
+            return new Success($list, $pos, $input, $nextPos);
         });
     }
 
@@ -239,15 +242,16 @@ trait Parsers
     {
         return new FuncParser(function (array $input, array $pos) use ($num, $p) {
             $list = array();
+            $nextPos = $pos;
             for ($i = 0; $i < $num; $i++) {
-                $r = $p->parse($input, $pos);
+                $r = $p->parse($input, $nextPos);
                 if (! $r->successful)
                     return $r;
                 $list[] = $r->result;
                 $input = $r->nextInput;
-                $pos = $r->nextPos;
+                $nextPos = $r->nextPos;
             }
-            return new Success($list, $input, $pos);
+            return new Success($list, $pos, $input, $nextPos);
         });
     }
 
@@ -274,15 +278,16 @@ trait Parsers
         $parsers = func_get_args();
         return new FuncParser(function (array $input, array $pos) use ($parsers) {
             $list = array();
+            $nextPos = $pos;
             foreach ($parsers as $p) {
-                $r = $p->parse($input, $pos);
+                $r = $p->parse($input, $nextPos);
                 if (! $r->successful)
                     return $r;
                 $list[] = $r->result;
                 $input = $r->nextInput;
-                $pos = $r->nextPos;
+                $nextPos = $r->nextPos;
             }
-            return new Success($list, $input, $pos);
+            return new Success($list, $pos, $input, $nextPos);
         });
     }
 

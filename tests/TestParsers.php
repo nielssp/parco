@@ -25,7 +25,7 @@ trait TestParsers {
      */
     public function successful($result) {
         return new FuncParser(function (array $input, array $pos) use ($result) {
-            return new Success($result, $input, $pos);
+            return new Success($result, $pos, $input, $pos);
         });
     }
     
@@ -37,7 +37,7 @@ trait TestParsers {
      */
     public function unsuccessful($message) {
         return new FuncParser(function (array $input, array $pos) use ($message) {
-            return new Failure($message, $input, $pos);
+            return new Failure($message, $pos, $input, $pos);
         });
     }
 }

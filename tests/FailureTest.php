@@ -9,7 +9,7 @@ class FailureTest extends \PHPUnit_Framework_TestCase
      */
     public function testGet()
     {
-        $f = new Failure('test', array(), array(1, 1));
+        $f = new Failure('test', array(1, 1), array(), array(1, 1));
         $f->get();
     }
 }

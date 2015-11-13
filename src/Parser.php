@@ -60,7 +60,7 @@ abstract class Parser
             $result = $this->parse($input, $pos);
             if (! $result->successful)
                 return $result;
-            return new Success($f($result->result), $result->nextInput, $result->nextPos);
+            return new Success($f($result->result), $pos, $result->nextInput, $result->nextPos);
         });
     }
 
@@ -87,7 +87,7 @@ abstract class Parser
             return new Success(array(
                 $a->result,
                 $b->result
-            ), $b->nextInput, $b->nextPos);
+            ), $pos, $b->nextInput, $b->nextPos);
         });
     }
 
@@ -111,7 +111,7 @@ abstract class Parser
             $b = $other->parse($a->nextInput, $a->nextPos);
             if (! $b->successful)
                 return $b;
-            return new Success($a->result, $b->nextInput, $b->nextPos);
+            return new Success($a->result, $pos, $b->nextInput, $b->nextPos);
         });
     }
 
@@ -135,7 +135,7 @@ abstract class Parser
             $b = $other->parse($a->nextInput, $a->nextPos);
             if (! $b->successful)
                 return $b;
-            return new Success($b->result, $b->nextInput, $b->nextPos);
+            return new Success($b->result, $pos, $b->nextInput, $b->nextPos);
         });
     }
 }

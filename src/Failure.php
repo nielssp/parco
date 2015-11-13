@@ -16,15 +16,18 @@ class Failure extends Result
      *
      * @param string $message
      *            Failure message.
+     * @param int[] $pos
+     *            Failure position.
      * @param array $nextInput
      *            Remaining input.
-     * @param array $nextPos
+     * @param int[] $nextPos
      *            Next position.
      */
-    public function __construct($message, array $nextInput, array $nextPos)
+    public function __construct($message, array $pos, array $nextInput, array $nextPos)
     {
         $this->successful = false;
         $this->message = $message;
+        $this->setPosition($pos);
         $this->nextInput = $nextInput;
         $this->nextPos = $nextPos;
     }

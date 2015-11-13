@@ -16,15 +16,18 @@ class Success extends Result
      *
      * @param mixed $result
      *            Parse result.
+     * @param int[] $pos
+     *            Result position.
      * @param array $nextInput
      *            Remaining input.
-     * @param array $nextPos
+     * @param int[] $nextPos
      *            Next position.
      */
-    public function __construct($result, array $nextInput, array $nextPos)
+    public function __construct($result, array $pos, array $nextInput, array $nextPos)
     {
         $this->successful = true;
         $this->result = $result;
+        $this->setPosition($pos);
         $this->nextInput = $nextInput;
         $this->nextPos = $nextPos;
     }
