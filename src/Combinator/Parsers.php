@@ -8,6 +8,9 @@ namespace Parco\Combinator;
 use Parco\Parser;
 use Parco\FuncParser;
 use Parco\Result;
+use Parco\Success;
+use Parco\Failure;
+
 
 /**
  * A collection of generic parser combinators.
@@ -31,7 +34,7 @@ trait Parsers
             $r = $p->parse($input, $pos);
             if ($r->successful)
                 return $r;
-            return new Result(true, null, $input, $pos);
+            return new Success(null, $input, $pos);
         });
     }
 
@@ -50,8 +53,8 @@ trait Parsers
         return new FuncParser(function (array $input, array $pos) use ($p) {
             $r = $p->parse($input, $pos);
             if ($r->successful)
-                return new Result(false, null, $input, $pos);
-            return new Result(true, null, $input, $pos);
+                return new Failure(null, $input, $pos);
+            return new Success(null, $input, $pos);
         });
     }
 
@@ -77,7 +80,7 @@ trait Parsers
                 $input = $r->nextInput;
                 $pos = $r->nextPos;
             }
-            return new Result(true, $list, $input, $pos);
+            return new Success($list, $input, $pos);
         });
     }
 
@@ -101,7 +104,7 @@ trait Parsers
             $list = array();
             $r = $p->parse($input, $pos);
             if (! $r->successful)
-                return new Result(true, $list, $input, $pos);
+                return new Success($list, $input, $pos);
             $list[] = $r->result;
             $input = $r->nextInput;
             $pos = $r->nextPos;
@@ -116,7 +119,7 @@ trait Parsers
                 $input = $r->nextInput;
                 $pos = $r->nextPos;
             }
-            return new Result(true, $list, $input, $pos);
+            return new Success($list, $input, $pos);
         });
     }
 
@@ -146,7 +149,7 @@ trait Parsers
                 $input = $r->nextInput;
                 $pos = $r->nextPos;
             } while (true);
-            return new Result(true, $list, $input, $pos);
+            return new Success($list, $input, $pos);
         });
     }
 
@@ -185,7 +188,7 @@ trait Parsers
                 $input = $r->nextInput;
                 $pos = $r->nextPos;
             }
-            return new Result(true, $list, $input, $pos);
+            return new Success($list, $input, $pos);
         });
     }
 
@@ -214,7 +217,7 @@ trait Parsers
                 $input = $r->nextInput;
                 $pos = $r->nextPos;
             }
-            return new Result(true, $list, $input, $pos);
+            return new Success($list, $input, $pos);
         });
     }
 
@@ -249,7 +252,7 @@ trait Parsers
                 $input = $r->nextInput;
                 $pos = $r->nextPos;
             }
-            return new Result(true, $list, $input, $pos);
+            return new Succcess($list, $input, $pos);
         });
     }
 

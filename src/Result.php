@@ -8,7 +8,7 @@ namespace Parco;
 /**
  * A parse result.
  */
-class Result implements Positional
+abstract class Result implements Positional
 {
     use Position;
 
@@ -24,7 +24,14 @@ class Result implements Positional
      *
      * @var mixed
      */
-    public $result;
+    public $result = null;
+
+    /**
+     * Failure message if unsuccessful.
+     *
+     * @var string|null
+     */
+    public $message = null;
 
     /**
      * Remaining input.
@@ -41,46 +48,10 @@ class Result implements Positional
     public $nextPos;
 
     /**
-     * Failure message if unsuccessful.
+     * Get stored parse result.
      *
-     * @var string|null
+     * @throws ParseException If unsuccessful.
+     * @return mixed Stored parse result.
      */
-    public $message;
-
-    /**
-     * Construct parse result.
-     *
-     * @param bool $successful
-     *            Whether parser was successful;
-     * @param mixed $result
-     *            Result if successful.
-     * @param array $nextInput
-     *            Remaining input.
-     * @param array $nextPos
-     *            Next position.
-     * @param string|null $message
-     *            Failure message if unsuccessful.
-     */
-    public function __construct($successful, $result, array $nextInput, array $nextPos, $message = null)
-    {
-        $this->successful = $successful;
-        $this->result = $result;
-        $this->nextInput = $nextInput;
-        $this->nextPos = $nextPos;
-        $this->message = $message;
-    }
-
-    /**
-     * Get embedded result.
-     *
-     * @throws \Exception
-     */
-    public function get()
-    {
-        if (! $this->successful) {
-            // TODO: replace with something meaninful
-            throw new \Exception('no value');
-        }
-        return $this->result;
-    }
+    public abstract function get();
 }
