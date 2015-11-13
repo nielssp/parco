@@ -32,6 +32,13 @@ class Result implements Positional
      * @var array
      */
     public $nextInput;
+    
+    /**
+     * Next position.
+     * 
+     * @var array
+     */
+    public $nextPos;
 
     /**
      * Failure message if unsuccessful.
@@ -49,14 +56,17 @@ class Result implements Positional
      *            Result if successful.
      * @param array $nextInput
      *            Remaining input.
+     * @param array $nextPos
+     *            Next position.
      * @param string|null $message
      *            Failure message if unsuccessful.
      */
-    public function __construct($successful, $result, array $nextInput, $message = null)
+    public function __construct($successful, $result, array $nextInput, array $nextPos, $message = null)
     {
         $this->successful = $successful;
         $this->result = $result;
         $this->nextInput = $nextInput;
+        $this->nextPos = $nextPos;
         $this->message = $message;
     }
 

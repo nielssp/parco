@@ -23,8 +23,8 @@ class FuncParser extends Parser
      * {@inheritdoc}
      *
      */
-    public function parse(array $input)
+    public function parse(array $input, array $pos)
     {
-        return call_user_func($this->func, $input);
+        return call_user_func($this->func, $input, $Pos);
     }
 }
