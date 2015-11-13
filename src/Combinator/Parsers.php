@@ -323,4 +323,28 @@ trait Parsers
             return $r;
         });
     }
+    
+    /**
+     * A parser that always succeeds.
+     * 
+     * @param mixed $result Parse result.
+     * @return FuncParser A parser.
+     */
+    public function success($result) {
+        return new FuncParser(function (array $input, array $pos) use ($result) {
+            return new Success($result, $pos, $input, $pos);
+        });
+    }
+    
+    /**
+     * A parser that always fails.
+     * 
+     * @param string $message Failure message.
+     * @return FuncParser A parser.
+     */
+    public function failure($message) {
+        return new FuncParser(function (array $input, array $pos) use ($message) {
+            return new Failure($message, $pos, $input, $pos);
+        });
+    }
 }

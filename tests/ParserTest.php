@@ -1,16 +1,18 @@
 <?php
 namespace Parco;
 
-class ParserTest extends \PHPUnit_Framework_TestCase
+use Parco\Combinator\Parsers;
+
+class ParserTest extends TestCase
 {
-    use TestParsers;
+    use Parsers;
 
     public function testAlt()
     {
-        $p1 = $this->successful(1);
-        $p2 = $this->successful(2);
-        $p3 = $this->unsuccessful('error1');
-        $p4 = $this->unsuccessful('error2');
+        $p1 = $this->success(1);
+        $p2 = $this->success(2);
+        $p3 = $this->failure('error1');
+        $p4 = $this->failure('error2');
 
         $c1 = $p1->alt($p2);
         $result = $this->apply($c1);
@@ -35,8 +37,8 @@ class ParserTest extends \PHPUnit_Framework_TestCase
     }
     
     public function testMap() {
-        $p1 = $this->successful(1);
-        $p2 = $this->unsuccessful('error1');
+        $p1 = $this->success(1);
+        $p2 = $this->failure('error1');
         
         $f = function($x) { return $x + 4; };
         
@@ -53,10 +55,10 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 
     public function testSeq()
     {
-        $p1 = $this->successful(1);
-        $p2 = $this->successful(2);
-        $p3 = $this->unsuccessful('error1');
-        $p4 = $this->unsuccessful('error2');
+        $p1 = $this->success(1);
+        $p2 = $this->success(2);
+        $p3 = $this->failure('error1');
+        $p4 = $this->failure('error2');
 
         $c1 = $p1->seq($p2);
         $result = $this->apply($c1);
@@ -77,10 +79,10 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 
     public function testSeqL()
     {
-        $p1 = $this->successful(1);
-        $p2 = $this->successful(2);
-        $p3 = $this->unsuccessful('error1');
-        $p4 = $this->unsuccessful('error2');
+        $p1 = $this->success(1);
+        $p2 = $this->success(2);
+        $p3 = $this->failure('error1');
+        $p4 = $this->failure('error2');
 
         $c1 = $p1->seqL($p2);
         $result = $this->apply($c1);
@@ -101,10 +103,10 @@ class ParserTest extends \PHPUnit_Framework_TestCase
 
     public function testSeqR()
     {
-        $p1 = $this->successful(1);
-        $p2 = $this->successful(2);
-        $p3 = $this->unsuccessful('error1');
-        $p4 = $this->unsuccessful('error2');
+        $p1 = $this->success(1);
+        $p2 = $this->success(2);
+        $p3 = $this->failure('error1');
+        $p4 = $this->failure('error2');
 
         $c1 = $p1->seqR($p2);
         $result = $this->apply($c1);

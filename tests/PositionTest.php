@@ -1,7 +1,7 @@
 <?php
 namespace Parco;
 
-class PositionTest extends \PHPUnit_Framework_TestCase
+class PositionTest extends TestCase
 {
     public function testPosition()
     {

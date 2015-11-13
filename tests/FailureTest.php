@@ -1,7 +1,7 @@
 <?php
 namespace Parco;
 
-class FailureTest extends \PHPUnit_Framework_TestCase
+class FailureTest extends TestCase
 {
     /**
      * @expectedException \Parco\ParseException

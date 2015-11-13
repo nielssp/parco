@@ -1,11 +1,10 @@
 <?php
 namespace Parco\Combinator;
 
-use Parco\TestParsers;
+use Parco\TestCase;
 
-class ParsersTest extends \PHPUnit_Framework_TestCase
+class ParsersTest extends TestCase
 {
-    use TestParsers;
     use Parsers;
     
     public function testElem()
@@ -29,8 +28,8 @@ class ParsersTest extends \PHPUnit_Framework_TestCase
     
     public function testOpt()
     {
-        $p1 = $this->successful(1);
-        $p2 = $this->unsuccessful('error1');
+        $p1 = $this->success(1);
+        $p2 = $this->failure('error1');
         
         $c1 = $this->opt($p1);
         $result = $this->apply($c1);
@@ -45,8 +44,8 @@ class ParsersTest extends \PHPUnit_Framework_TestCase
     
     public function testNot()
     {
-        $p1 = $this->successful(1);
-        $p2 = $this->unsuccessful('error1');
+        $p1 = $this->success(1);
+        $p2 = $this->failure('error1');
         
         $c1 = $this->not($p1);
         $result = $this->apply($c1);
@@ -151,10 +150,10 @@ class ParsersTest extends \PHPUnit_Framework_TestCase
 
     public function testSeq()
     {
-        $p1 = $this->successful(1);
-        $p2 = $this->successful(2);
-        $p3 = $this->unsuccessful('error1');
-        $p4 = $this->unsuccessful('error2');
+        $p1 = $this->success(1);
+        $p2 = $this->success(2);
+        $p3 = $this->failure('error1');
+        $p4 = $this->failure('error2');
 
         $c1 = $this->seq($p1, $p2);
         $result = $this->apply($c1);
@@ -175,10 +174,10 @@ class ParsersTest extends \PHPUnit_Framework_TestCase
 
     public function testAlt()
     {
-        $p1 = $this->successful(1);
-        $p2 = $this->successful(2);
-        $p3 = $this->unsuccessful('error1');
-        $p4 = $this->unsuccessful('error2');
+        $p1 = $this->success(1);
+        $p2 = $this->success(2);
+        $p3 = $this->failure('error1');
+        $p4 = $this->failure('error2');
 
         $c1 = $this->alt($p1, $p2);
         $result = $this->apply($c1);
@@ -200,5 +199,21 @@ class ParsersTest extends \PHPUnit_Framework_TestCase
         $result = $this->apply($c4);
         $this->assertFalse($result->successful);
         $this->assertEquals('error2', $result->message);
+    }
+
+    public function testSuccess()
+    {
+        $p1 = $this->success(1);
+        $result = $this->apply($p1);
+        $this->assertTrue($result->successful);
+        $this->assertEquals(1, $result->get());
+    }
+
+    public function testFailure()
+    {
+        $p1 = $this->failure('error1');
+        $result = $this->apply($p1);
+        $this->assertFalse($result->successful);
+        $this->assertEquals('error1', $result->message);
     }
 }
