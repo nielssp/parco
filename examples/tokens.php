@@ -1,5 +1,4 @@
 <?php
-use Parco\Combinator\RegexParsers;
 use Parco\Positional;
 use Parco\Position;
 use Parco\Combinator\PositionalParsers;
@@ -243,7 +242,7 @@ try {
     echo 'Abstract syntax tree:' . PHP_EOL;
     print_r($ast);
 } catch (\Parco\ParseException $e) {
-    echo 'Syntax Error: ' . $e->getMessage() . ' on line ' . $e->posLine() . ' column ' . $e->posColumn() . PHP_EOL;
+    echo 'Syntax Error: ' . $e->getMessage() . ' on line ' . $e->line() . ' column ' . $e->column() . PHP_EOL;
 }
 
 echo '</pre>';

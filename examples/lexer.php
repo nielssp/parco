@@ -149,9 +149,9 @@ try {
     foreach ($tokens as $token)
         echo ' ' . $token;
 } catch (\Parco\ParseException $e) {
-    echo 'Syntax Error: ' . $e->getMessage() . ' on line ' . $e->posLine() . ' column ' . $e->posColumn() . PHP_EOL;
+    echo 'Syntax Error: ' . $e->getMessage() . ' on line ' . $e->line() . ' column ' . $e->column() . PHP_EOL;
     echo $input . PHP_EOL;
-    echo str_repeat('-', $e->posColumn() - 1) . '^';
+    echo str_repeat('-', $e->column() - 1) . '^';
 }
 
 

@@ -13,7 +13,7 @@ class PositionTest extends TestCase
         $mock->setPosition(array(5, 17));
         $this->assertEquals(array(5, 17), $mock->getPosition());
         
-        $this->assertEquals(5, $mock->posLine());
-        $this->assertEquals(17, $mock->posColumn());
+        $this->assertEquals(5, $mock->line());
+        $this->assertEquals(17, $mock->column());
     }
 }
