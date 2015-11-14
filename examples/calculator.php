@@ -3,12 +3,16 @@ use Parco\Combinator\RegexParsers;
 
 include __DIR__ . '/../vendor/autoload.php';
 
-// Grammar:
-// expr ::= term {"+" term | "-" term}
-// term ::= factor {"*" factor | "/" factor}
+//
+// Calculator grammar:
+//
+// expr   ::= term {"+" term | "-" term}
+// term   ::= factor {"*" factor | "/" factor}
 // factor ::= "(" expr ")"
-// | number
+//          | number
 // number ::= digit {digit} ["." digit {digit}]
+//
+
 class Calculator
 {
     use RegexParsers;
@@ -101,4 +105,4 @@ class Calculator
 
 $calculator = new Calculator();
 
-echo $calculator('2 + 4 / 2 - 3 * ( 6 + 2 ) ');
+echo $calculator(' 2 + 4 / 2 - 3 * ( 6 + 2 ) ');
