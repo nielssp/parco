@@ -6,3 +6,20 @@ php:
   - 7.0
   - hhvm
   - nightly
+
+
+before_script:
+  - composer self-update
+  - composer install --prefer-dist --no-interaction
+
+  - composer require --dev satooshi/php-coveralls:dev-master; fi
+  - mkdir -p build/logs; fi"
+
+  - phpenv rehash
+
+script:
+  - vendor/bin/phpcs -p --standard=PSR2 ./src ./tests
+
+  - phpunit --coverage-clover build/logs/clover.xml
+
+  - vendor/bin/coveralls -c .coveralls.yml -v

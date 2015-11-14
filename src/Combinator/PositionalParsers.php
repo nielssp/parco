@@ -49,7 +49,7 @@ trait PositionalParsers
      */
     protected function show($element)
     {
-        if (is_callable(array($element, '__toString'))) {
+        if (method_exists($element, '__toString')) {
             return $element->__toString();
         }
         return get_class($element);

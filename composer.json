@@ -13,11 +13,8 @@
       "role": "Developer"
     }
   ],
-  "support": {
-    "email": "parco@nielssp.dk"
-  },
   "autoload": {
-    "psr-4": {"Parco\\": "src/"}
+    "psr-4": { "Parco\\": "src/" }
   },
   "autoload-dev": {
     "psr-4": { "Parco\\": "tests/" }
