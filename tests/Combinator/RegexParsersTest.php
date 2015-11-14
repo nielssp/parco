@@ -89,4 +89,26 @@ class RegexParsersTest extends TestCase
         $this->assertEquals(array(), $result->nextInput);
         $this->assertEquals(array(1, 7), $result->nextPos);
     }
+    
+    public function testGroup()
+    {
+        $p1 = $this->regex('/a(b)?a+/');
+        
+        $c1 = $this->group(1, $p1); 
+        $result = $this->parse($c1, '');
+        $this->assertFalse($result->successful);
+        $this->assertEquals('unexpected end of input', $result->message);
+        
+        $result = $this->parse($c1, 'aa');
+        $this->assertTrue($result->successful);
+        $this->assertEquals(null, $result->get());
+
+        $result = $this->parse($c1, 'aba');
+        $this->assertTrue($result->successful);
+        $this->assertEquals('b', $result->get());
+        $this->assertEquals(array(1, 2), $result->getPosition());
+        $this->assertEquals(array(), $result->nextInput);
+        $this->assertEquals(array(1, 4), $result->nextPos);
+    }
+
 }

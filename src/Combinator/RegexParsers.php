@@ -9,6 +9,7 @@ use Parco\Parser;
 use Parco\FuncParser;
 use Parco\Success;
 use Parco\Failure;
+use Parco\Match;
 
 /**
  * A collection of parser combinators for string/character parsing using
@@ -29,7 +30,7 @@ trait RegexParsers
      */
     public function parse(Parser $p, $string)
     {
-        $input = preg_split('//', $string, -1, PREG_SPLIT_NO_EMPTY);
+        $input = preg_split('//u', $string, -1, PREG_SPLIT_NO_EMPTY);
         return $p->parse($input, array(1, 1));
     }
 
@@ -47,7 +48,7 @@ trait RegexParsers
      */
     public function parseAll(Parser $p, $string)
     {
-        $input = preg_split('//', $string, -1, PREG_SPLIT_NO_EMPTY);
+        $input = preg_split('//u', $string, -1, PREG_SPLIT_NO_EMPTY);
         return $this->phrase($p)->parse($input, array(1, 1));
     }
     
@@ -108,7 +109,9 @@ trait RegexParsers
     }
 
     /**
-     * A parser that matches a regular expression string
+     * A parser that matches a regular expression string.
+     * 
+     * The parser returns uses an instance of {@see Match} to store its result.
      *
      * @param  string $r
      *            A regular expression, see {@see preg_match}.
@@ -125,13 +128,38 @@ trait RegexParsers
                     }
                     return new Failure('unexpected "' . $input[0] . '"', $pos, $input, $pos);
                 }
-                $match = $matches[0][0];
-                $length = strlen($match);
+                $length = strlen($matches[0][0]);
                 $input = array_slice($input, $length);
                 $nextPos = $pos;
                 $nextPos[1] += $length;
-                return new Success($match, $pos, $input, $nextPos);
+                return new Match($matches, $pos, $input, $nextPos);
             }
         );
+    }
+
+    /**
+     * A parser that returns the `$i`th group of a regex parse result.
+     *
+     * @param int $i
+     *            Group number starting from 0, where 0 is the entire matched
+     *            string.
+     * @param Parser $p
+     *            A regex parser, see {@see regex}.
+     * @return FuncParser A parser that returns the group or null if the group
+     *         is empty.
+     */
+    public function group($i, Parser $p)
+    {
+        return new FuncParser(function (array $input, array $pos) use ($i, $p) {
+            $r = $p->parse($input, $pos);
+            if (! $r->successful)
+                return $r;
+            $group = $r->group($i);
+            $offset = $r->offset($i);
+            if (isset($offset)) {
+                $pos[1] += $offset;
+            }
+            return new Success($group, $pos, $r->nextInput, $r->nextPos);
+        });
     }
 }
