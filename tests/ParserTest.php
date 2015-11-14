@@ -42,7 +42,6 @@ class ParserTest extends TestCase
         
         $f = function ($x) {
             return $x + 4;
-
         };
         
         $m1 = $p1->map($f);
@@ -67,7 +66,6 @@ class ParserTest extends TestCase
         $result = $this->apply($c1);
         $this->assertTrue($result->successful);
         $this->assertEquals(array(1, 2), $result->get());
-        
         
         $c2 = $p1->seq($p3);
         $result = $this->apply($c2);
@@ -116,7 +114,6 @@ class ParserTest extends TestCase
         $this->assertTrue($result->successful);
         $this->assertEquals(2, $result->get());
         
-        
         $c2 = $p1->seqR($p3);
         $result = $this->apply($c2);
         $this->assertFalse($result->successful);
@@ -126,5 +123,21 @@ class ParserTest extends TestCase
         $result = $this->apply($c3);
         $this->assertFalse($result->successful);
         $this->assertEquals('error1', $result->message);
+    }
+
+    public function testWithFailure()
+    {
+        $p1 = $this->success(1);
+        $p2 = $this->failure('error1');
+
+        $c1 = $p1->withFailure('error2');
+        $result = $this->apply($c1);
+        $this->assertTrue($result->successful);
+        $this->assertEquals(1, $result->get());
+
+        $c2 = $p2->withFailure('error2');
+        $result = $this->apply($c2);
+        $this->assertFalse($result->successful);
+        $this->assertEquals('error2', $result->message);
     }
 }

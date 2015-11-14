@@ -147,18 +147,34 @@ abstract class Parser
      */
     public function seqR(Parser $other)
     {
-        return new FuncParser(
-            function (array $input, array $pos) use ($other) {
-                $a = $this->parse($input, $pos);
-                if (! $a->successful) {
-                    return $a;
-                }
-                $b = $other->parse($a->nextInput, $a->nextPos);
-                if (! $b->successful) {
-                    return $b;
-                }
-                return new Success($b->result, $pos, $b->nextInput, $b->nextPos);
+        return new FuncParser(function (array $input, array $pos) use ($other) {
+            $a = $this->parse($input, $pos);
+            if (! $a->successful) {
+                return $a;
             }
-        );
+            $b = $other->parse($a->nextInput, $a->nextPos);
+            if (! $b->successful) {
+                return $b;
+            }
+            return new Success($b->result, $pos, $b->nextInput, $b->nextPos);
+        });
+    }
+
+    /**
+     * Change the failure message produced by this parser.
+     *
+     * @param string $message
+     *            The new failure message.
+     * @return FuncParser A parser with the new failure message.
+     */
+    public function withFailure($message)
+    {
+        return new FuncParser(function (array $input, array $pos) use ($message) {
+            $r = $this->parse($input, $pos);
+            if ($r->successful) {
+                return $r;
+            }
+            return new Failure($message, $r->getPosition(), $r->nextInput, $r->nextPos);
+        });
     }
 }
