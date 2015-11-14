@@ -9,6 +9,7 @@ use Parco\Parser;
 use Parco\FuncParser;
 use Parco\Success;
 use Parco\Failure;
+use Parco\Positional;
 
 
 /**
@@ -16,6 +17,21 @@ use Parco\Failure;
  */
 trait Parsers
 {
+    private $parserCache = array();
+    
+    /**
+     * 
+     * 
+     * @param unknown $parser
+     * @return Parser A parser.
+     */
+    public function __get($parser)
+    {
+        if (!isset($this->parserCache[$parser])) {
+            $this->parserCache[$parser] = $this->$parser();
+        }
+        return $this->parserCache[$parser];
+    }
 
     /**
      * A parser that accepts only the given element.
@@ -46,6 +62,52 @@ trait Parsers
             $nextPos = $pos;
             $nextPos[1]++;
             return new Success($e, $pos, $input, $nextPos);
+        });
+    }
+
+    /**
+     * A parser that parses the entire input.
+     *
+     * `phrase($p)` is a parser that succeeds if `$p` succeeds and no input
+     * remains. 
+     *
+     * @param Parser $p
+     *            A parser.
+     * @return FuncParser A phrase parser.
+     */
+    public function phrase(Parser $p)
+    {
+        return new FuncParser(function (array $input, array $pos) use ($p) {
+            $r = $p->parse($input, $pos);
+            if (! $r->successful)
+                return $r;
+            if (count($r->nextInput)) {
+                return new Failure(
+                    'unexpected "' . $r->nextInput[0] . '", expected end of input',
+                    $r->nextPos, $r->nextInput, $r->nextPos
+                );
+            }
+            return $r;
+        });
+    }
+
+    /**
+     * Add position to result of parser.
+     *
+     * `positioned($p)` adds the position of the first input to the result of
+     * `$p`. The result must implement {@see Positional}.
+     *
+     * @param Parser $p
+     *            A parser.
+     * @return FuncParser A positioned parser.
+     */
+    public function positioned(Parser $p)
+    {
+        return new FuncParser(function (array $input, array $pos) use ($p) {
+            $r = $p->parse($input, $pos);
+            if ($r->successful)
+                $r->get()->setPosition($pos);
+            return $r;
         });
     }
 

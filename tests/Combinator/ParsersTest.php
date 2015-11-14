@@ -25,6 +25,40 @@ class ParsersTest extends TestCase
         $this->assertEquals(array(2), $result->nextInput);
         $this->assertEquals(array(1, 2), $result->nextPos);
     }
+
+    public function testPhrase()
+    {
+        $p1 = $this->elem(1);
+        
+        $c1 = $this->phrase($p1);
+        $result = $this->apply($c1);
+        $this->assertFalse($result->successful);
+        $this->assertEquals('unexpected end of input, expected "1"', $result->message);
+            
+        $result = $this->apply($c1, array(1, 1));
+        $this->assertFalse($result->successful);
+        $this->assertEquals('unexpected "1", expected end of input', $result->message);
+        $this->assertEquals(array(1), $result->nextInput);
+        $this->assertEquals(array(1, 2), $result->nextPos);
+        
+        $result = $this->apply($c1, array(1));
+        $this->assertTrue($result->successful);
+        $this->assertEquals(1, $result->get());
+        $this->assertEquals(array(), $result->nextInput);
+        $this->assertEquals(array(1, 2), $result->nextPos);
+    }
+
+    public function testPositioned()
+    {
+        $mock = $this->getMockForTrait('Parco\Position');
+
+        $p1 = $this->success($mock);
+
+        $c1 = $this->positioned($p1);
+        $result = $this->apply($c1);
+        $this->assertTrue($result->successful);
+        $this->assertEquals(array(1, 1), $result->get()->getPosition());
+    }
     
     public function testOpt()
     {
