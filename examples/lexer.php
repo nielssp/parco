@@ -55,7 +55,7 @@ class Lexer
     
     public function stringLiteral() {
         return $this->char('"')
-            ->seqR($this->regex('/([^"\\]|\\.)*/m'))
+            ->seqR($this->regex('/([^"\\\\]|\\.)*/m'))
             ->seqL($this->char('"'))
             ->map(function ($string) {
                 return new Token('string', $string);
@@ -140,7 +140,19 @@ class Lexer
 
 $lexer = new Lexer();
 
-echo 'Result: ';
-$tokens = $lexer('let x = 5 in \y -> x + y');
-foreach ($tokens as $token)
-    echo ' ' . $token;
+echo '<pre>';
+
+echo 'Result: ' . PHP_EOL;
+$input = 'let x = 5 in \y -> x + y ';
+try {
+    $tokens = $lexer($input);
+    foreach ($tokens as $token)
+        echo ' ' . $token;
+} catch (\Parco\ParseException $e) {
+    echo 'Syntax Error: ' . $e->getMessage() . ' on line ' . $e->posLine() . ' column ' . $e->posColumn() . PHP_EOL;
+    echo $input . PHP_EOL;
+    echo str_repeat('-', $e->posColumn() - 1) . '^';
+}
+
+
+echo '</pre>';
