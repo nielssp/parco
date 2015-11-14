@@ -32,10 +32,10 @@ trait Parsers
     public function __get($name)
     {
         return new FuncParser(function (array $input, array $pos) use ($name) {
-            if (!isset($this->parserCache[$parser])) {
-                $this->parserCache[$parser] = $this->$parser();
+            if (! isset($this->parserCache[$name])) {
+                $this->parserCache[$name] = $this->$name();
             }
-            return $this->parserCache[$parser]->parse($input, $pos);
+            return $this->parserCache[$name]->parse($input, $pos);
         });
     }
 

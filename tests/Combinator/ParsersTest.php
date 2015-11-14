@@ -7,6 +7,38 @@ class ParsersTest extends TestCase
 {
     use Parsers;
     
+    private $called = 0;
+    
+    protected function setUp()
+    {
+        $this->called = 0;
+    }
+    
+    protected function example()
+    {
+        $this->called++;
+        return $this->success(1);
+    }
+    
+    public function testLazyGet()
+    {
+        $p1 = $this->example;
+        
+        $this->assertEquals(0, $this->called);
+
+        $result = $this->apply($p1);
+        $this->assertTrue($result->successful);
+        $this->assertEquals(1, $result->get());
+
+        $this->assertEquals(1, $this->called);
+
+        $result = $this->apply($p1);
+        $this->assertTrue($result->successful);
+        $this->assertEquals(1, $result->get());
+
+        $this->assertEquals(1, $this->called);
+    }
+    
     public function testElem()
     {
         $p1 = $this->elem(1);
