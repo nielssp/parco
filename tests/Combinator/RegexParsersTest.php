@@ -20,21 +20,64 @@ class RegexParsersTest extends TestCase
     
     public function testParseAll()
     {
+        $this->skipWhitespace = false;
+        
         $p1 = $this->rep($this->char('a'));
         
         $result = $this->parseAll($p1, 'aab');
         $this->assertFalse($result->successful);
         $this->assertEquals('unexpected "b", expected end of input', $result->message);
+        
+        $result = $this->parseAll($p1, 'aa ');
+        $this->assertFalse($result->successful);
+        $this->assertEquals('unexpected " ", expected end of input', $result->message);
 
         $result = $this->parseAll($p1, 'aa');
         $this->assertTrue($result->successful);
         $this->assertEquals(array('a', 'a'), $result->get());
         $this->assertEquals(array(), $result->nextInput);
         $this->assertEquals(array(1, 3), $result->nextPos);
+
+        $this->skipWhitespace = true;
+        
+        $result = $this->parseAll($p1, 'aa ');
+        $this->assertTrue($result->successful);
+        $this->assertEquals(array('a', 'a'), $result->get());
+        $this->assertEquals(array(), $result->nextInput);
+        $this->assertEquals(array(1, 4), $result->nextPos);
+    }
+    
+    public function testWhitespace()
+    {
+        $p1 = $this->whitespace();
+        
+        $result = $this->parse($p1, '');
+        $this->assertTrue($result->successful);
+        $this->assertEquals(null, $result->get());
+
+        $result = $this->parse($p1, "\x09\x0A\x0B\x0C\x0D\x20");
+        $this->assertTrue($result->successful);
+        $this->assertEquals(null, $result->get());
+        $this->assertEquals(array(), $result->nextInput);
+        $this->assertEquals(array(2, 5), $result->nextPos);
+
+        $result = $this->parse($p1, " \t a");
+        $this->assertTrue($result->successful);
+        $this->assertEquals(null, $result->get());
+        $this->assertEquals(array('a'), $result->nextInput);
+        $this->assertEquals(array(1, 4), $result->nextPos);
+
+        $result = $this->parse($p1, "  \n a");
+        $this->assertTrue($result->successful);
+        $this->assertEquals(null, $result->get());
+        $this->assertEquals(array('a'), $result->nextInput);
+        $this->assertEquals(array(2, 2), $result->nextPos);
     }
     
     public function testChar()
     {
+        $this->skipWhitespace = false;
+        
         $p1 = $this->char('a');
         
         $result = $this->apply($p1, array());
@@ -73,6 +116,8 @@ class RegexParsersTest extends TestCase
     
     public function testRegex()
     {
+        $this->skipWhitespace = false;
+        
         $p1 = $this->regex('/[ab]+/');
         
         $result = $this->parse($p1, '');

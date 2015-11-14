@@ -18,6 +18,14 @@ use Parco\Match;
 trait RegexParsers
 {
     use Parsers;
+    
+    /**
+     * If true, parsers produced by {@see char}, {@see string}, and {@see regex}
+     * will skip whitespace before.
+     *
+     * @var bool $skipWhitespace
+     */
+    protected $skipWhitespace = true;
 
     /**
      * Use a character parser to parse a string.
@@ -35,8 +43,8 @@ trait RegexParsers
     }
 
     /**
-     * Use a character parser to parse a string, the entire string must be
-     * parsed.
+     * Use a character parser to parse a string. The entire string must be
+     * consumed by the parser.
      *
      * `parseAll($p)` is the same as `parse(phrase($p))`.
      *
@@ -48,8 +56,53 @@ trait RegexParsers
      */
     public function parseAll(Parser $p, $string)
     {
-        $input = preg_split('//u', $string, -1, PREG_SPLIT_NO_EMPTY);
-        return $this->phrase($p)->parse($input, array(1, 1));
+        if ($this->skipWhitespace) {
+            $p = $p->seqL($this->whitespace());
+        }
+        $p = $this->phrase($p);
+        return $this->parse($p, $string);
+    }
+    
+    /**
+     * A parser that matches any number of whitespace characters.
+     *
+     * The following bytes are matched: 0x09 (horizontal tab), 0x0A (line feed),
+     * 0x0B (vertical tab), 0x0C (form feed), 0x0D (carriage return), and 0x20
+     * (space).
+     *
+     * @return Parser A whitespace parser.
+     */
+    public function whitespace()
+    {
+        if (! isset($this->parserCache['@ws'])) {
+            $this->parserCache['@ws'] = new FuncParser(function (array $input, array $pos) {
+                $i = 0;
+                $nextPos = $pos;
+                while (true) {
+                    if (! isset($input[$i])) {
+                        return new Success(null, $pos, array(), $nextPos);
+                    }
+                    switch ($input[$i]) {
+                        case "\x0A":
+                            $nextPos[0]++;
+                            $nextPos[1] = 1;
+                            break;
+                        case "\x09":
+                        case "\x0B":
+                        case "\x0C":
+                        case "\x0D":
+                        case "\x20":
+                            $nextPos[1]++;
+                            break;
+                        default:
+                            $input = array_slice($input, $i);
+                            return new Success(null, $pos, $input, $nextPos);
+                    }
+                    $i++;
+                }
+            });
+        }
+        return $this->parserCache['@ws'];
     }
     
     /**
@@ -60,10 +113,13 @@ trait RegexParsers
      *
      * @param  string $c
      *            A character.
-     * @return FuncParser A character parser.
+     * @return Parser A character parser.
      */
     public function char($c)
     {
+        if ($this->skipWhitespace) {
+            return $this->whitespace()->seqR($this->elem($c));
+        }
         return $this->elem($c);
     }
 
@@ -75,37 +131,40 @@ trait RegexParsers
      *
      * @param  string $s
      *            A string.
-     * @return FuncParser A string parser.
+     * @return Parser A string parser.
      */
     public function string($s)
     {
-        return new FuncParser(
-            function (array $input, array $pos) use ($s) {
-                $length = strlen($s);
-                for ($i = 0; $i < $length; $i++) {
-                    if (! isset($input[$i])) {
-                        return new Failure(
-                            'unexpected end of input, expected "' . $s[$i] . '"',
-                            $pos,
-                            $input,
-                            $pos
-                        );
-                    }
-                    if ($input[$i] != $s[$i]) {
-                        return new Failure(
-                            'unexpected "' . $input[$i] . '", expected "' . $s[$i] . '"',
-                            $pos,
-                            $input,
-                            $pos
-                        );
-                    }
-                }
-                $input = array_slice($input, $length);
-                $nextPos = $pos;
-                $nextPos[1] += $length;
-                return new Success($s, $pos, $input, $nextPos);
+        return new FuncParser(function (array $input, array $pos) use ($s) {
+            if ($this->skipWhitespace) {
+                $r = $this->whitespace()->parse($input, $pos);
+                $input = $r->nextInput;
+                $pos = $r->nextPos;
             }
-        );
+            $length = strlen($s);
+            for ($i = 0; $i < $length; $i++) {
+                if (! isset($input[$i])) {
+                    return new Failure(
+                        'unexpected end of input, expected "' . $s[$i] . '"',
+                        $pos,
+                        $input,
+                        $pos
+                    );
+                }
+                if ($input[$i] != $s[$i]) {
+                    return new Failure(
+                        'unexpected "' . $input[$i] . '", expected "' . $s[$i] . '"',
+                        $pos,
+                        $input,
+                        $pos
+                    );
+                }
+            }
+            $input = array_slice($input, $length);
+            $nextPos = $pos;
+            $nextPos[1] += $length;
+            return new Success($s, $pos, $input, $nextPos);
+        });
     }
 
     /**
@@ -113,28 +172,31 @@ trait RegexParsers
      *
      * The parser returns uses an instance of {@see Match} to store its result.
      *
-     * @param  string $r
+     * @param  string $regex
      *            A regular expression, see {@see preg_match}.
-     * @return FuncParser A regex parser.
+     * @return Parser A regex parser.
      */
-    public function regex($r)
+    public function regex($regex)
     {
-        return new FuncParser(
-            function (array $input, array $pos) use ($r) {
-                $ret = preg_match($r, implode('', $input), $matches, PREG_OFFSET_CAPTURE);
-                if ($ret !== 1 or $matches[0][1] !== 0) {
-                    if (! count($input)) {
-                        return new Failure('unexpected end of input', $pos, $input, $pos);
-                    }
-                    return new Failure('unexpected "' . $input[0] . '"', $pos, $input, $pos);
-                }
-                $length = strlen($matches[0][0]);
-                $input = array_slice($input, $length);
-                $nextPos = $pos;
-                $nextPos[1] += $length;
-                return new Match($matches, $pos, $input, $nextPos);
+        return new FuncParser(function (array $input, array $pos) use ($regex) {
+            if ($this->skipWhitespace) {
+                $r = $this->whitespace()->parse($input, $pos);
+                $input = $r->nextInput;
+                $pos = $r->nextPos;
             }
-        );
+            $ret = preg_match($regex, implode('', $input), $matches, PREG_OFFSET_CAPTURE);
+            if ($ret !== 1 or $matches[0][1] !== 0) {
+                if (! count($input)) {
+                    return new Failure('unexpected end of input', $pos, $input, $pos);
+                }
+                return new Failure('unexpected "' . $input[0] . '"', $pos, $input, $pos);
+            }
+            $length = strlen($matches[0][0]);
+            $input = array_slice($input, $length);
+            $nextPos = $pos;
+            $nextPos[1] += $length;
+            return new Match($matches, $pos, $input, $nextPos);
+        });
     }
 
     /**
@@ -145,8 +207,8 @@ trait RegexParsers
      *            string.
      * @param Parser $p
      *            A regex parser, see {@see regex}.
-     * @return FuncParser A parser that returns the group or null if the group
-     *         is empty.
+     * @return Parser A parser that returns the group or null if the group is
+     *         empty.
      */
     public function group($i, Parser $p)
     {

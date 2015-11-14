@@ -30,7 +30,7 @@ class Calculator
      */
     public function factor()
     {
-        $expr = $this->elem('(')->seqR($this->expr)->seqL($this->elem(')'));
+        $expr = $this->char('(')->seqR($this->expr)->seqL($this->char(')'));
         return $expr->alt($this->number);
     }
 
@@ -41,8 +41,8 @@ class Calculator
     public function term()
     {
         return $this->factor->seq($this->rep($this->alt(
-            $this->elem("*")->seq($this->factor),
-            $this->elem("/")->seq($this->factor)
+            $this->char("*")->seq($this->factor),
+            $this->char("/")->seq($this->factor)
         )))->map(function ($numbers) {
             // $numbers = array(factor, array(array("*", factor), ...))
             $x = $numbers[0];
@@ -64,8 +64,8 @@ class Calculator
     public function expr()
     {
         return $this->term->seq($this->rep($this->alt(
-            $this->elem("+")->seq($this->term),
-            $this->elem("-")->seq($this->term)
+            $this->char("+")->seq($this->term),
+            $this->char("-")->seq($this->term)
         )))->map(function ($numbers) {
             // $numbers = array(term, array(array("+", term), ...))
             $x = $numbers[0];
@@ -101,5 +101,4 @@ class Calculator
 
 $calculator = new Calculator();
 
-// TODO: ignore whitespace
-echo $calculator('2+4/2-3*(6+2)');
+echo $calculator('2 + 4 / 2 - 3 * ( 6 + 2 ) ');

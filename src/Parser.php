@@ -32,19 +32,17 @@ abstract class Parser
      *
      * @param  Parser $other
      *            Other parser.
-     * @return FuncParser An alternative composition of the input parsers.
+     * @return Parser An alternative composition of the input parsers.
      */
     public function alt(Parser $other)
     {
-        return new FuncParser(
-            function (array $input, array $pos) use ($other) {
-                $result = $this->parse($input, $pos);
-                if ($result->successful) {
-                    return $result;
-                }
-                return $other->parse($input, $pos);
+        return new FuncParser(function (array $input, array $pos) use ($other) {
+            $result = $this->parse($input, $pos);
+            if ($result->successful) {
+                return $result;
             }
-        );
+            return $other->parse($input, $pos);
+        });
     }
 
     /**
@@ -54,20 +52,18 @@ abstract class Parser
      * succeeds and returns `$x`. It fails if `$p` fails.
      *
      * @param  callable $f Function to apply to parser output.
-     * @return FuncParser A parser that applies a function to the output of
-     * this parser.
+     * @return Parser A parser that applies a function to the output of this
+     * parser.
      */
     public function map(callable $f)
     {
-        return new FuncParser(
-            function (array $input, array $pos) use ($f) {
-                $result = $this->parse($input, $pos);
-                if (! $result->successful) {
-                    return $result;
-                }
-                return new Success($f($result->result), $pos, $result->nextInput, $result->nextPos);
+        return new FuncParser(function (array $input, array $pos) use ($f) {
+            $result = $this->parse($input, $pos);
+            if (! $result->successful) {
+                return $result;
             }
-        );
+            return new Success($f($result->result), $pos, $result->nextInput, $result->nextPos);
+        });
     }
 
     /**
@@ -79,31 +75,29 @@ abstract class Parser
      *
      * @param  Parser $other
      *            Other parser.
-     * @return FuncParser A sequential composition of the input parsers.
+     * @return Parser A sequential composition of the input parsers.
      */
     public function seq(Parser $other)
     {
-        return new FuncParser(
-            function (array $input, array $pos) use ($other) {
-                $a = $this->parse($input, $pos);
-                if (! $a->successful) {
-                    return $a;
-                }
-                $b = $other->parse($a->nextInput, $a->nextPos);
-                if (! $b->successful) {
-                    return $b;
-                }
-                return new Success(
-                    array(
-                    $a->result,
-                    $b->result
-                    ),
-                    $pos,
-                    $b->nextInput,
-                    $b->nextPos
-                );
+        return new FuncParser(function (array $input, array $pos) use ($other) {
+            $a = $this->parse($input, $pos);
+            if (! $a->successful) {
+                return $a;
             }
-        );
+            $b = $other->parse($a->nextInput, $a->nextPos);
+            if (! $b->successful) {
+                return $b;
+            }
+            return new Success(
+                array(
+                $a->result,
+                $b->result
+                ),
+                $pos,
+                $b->nextInput,
+                $b->nextPos
+            );
+        });
     }
 
     /**
@@ -115,23 +109,21 @@ abstract class Parser
      *
      * @param  Parser $other
      *            Other parser.
-     * @return FuncParser A sequential composition of the input parsers.
+     * @return Parser A sequential composition of the input parsers.
      */
     public function seqL(Parser $other)
     {
-        return new FuncParser(
-            function (array $input, array $pos) use ($other) {
-                $a = $this->parse($input, $pos);
-                if (! $a->successful) {
-                    return $a;
-                }
-                $b = $other->parse($a->nextInput, $a->nextPos);
-                if (! $b->successful) {
-                    return $b;
-                }
-                return new Success($a->result, $pos, $b->nextInput, $b->nextPos);
+        return new FuncParser(function (array $input, array $pos) use ($other) {
+            $a = $this->parse($input, $pos);
+            if (! $a->successful) {
+                return $a;
             }
-        );
+            $b = $other->parse($a->nextInput, $a->nextPos);
+            if (! $b->successful) {
+                return $b;
+            }
+            return new Success($a->result, $pos, $b->nextInput, $b->nextPos);
+        });
     }
 
     /**
@@ -143,7 +135,7 @@ abstract class Parser
      *
      * @param  Parser $other
      *            Other parser.
-     * @return FuncParser A sequential composition of the input parsers.
+     * @return Parser A sequential composition of the input parsers.
      */
     public function seqR(Parser $other)
     {
@@ -165,7 +157,7 @@ abstract class Parser
      *
      * @param string $message
      *            The new failure message.
-     * @return FuncParser A parser with the new failure message.
+     * @return Parser A parser with the new failure message.
      */
     public function withFailure($message)
     {
