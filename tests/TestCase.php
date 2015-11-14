@@ -12,11 +12,11 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
      *
      * @param Parser $parser
      *            A parser.
-     * @param array $input
-     *            An input array.
+     * @param mixed $input
+     *            An input sequence.
      * @return Result Parse result.
      */
-    public function apply(Parser $parser, array $input = array())
+    public function apply(Parser $parser, $input = array())
     {
         return $parser->parse($input, array(1, 1));
     }

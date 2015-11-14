@@ -14,14 +14,14 @@ abstract class Parser
     /**
      * Apply parser to input sequence.
      *
-     * @param  array $input
+     * @param  mixed $input
      *            Input sequence.
      * @param  int[] $pos
      *            Current position as a 2-element array consisting of a line
      *            number and a column number.
      * @return Result Parser result.
      */
-    abstract public function parse(array $input, array $pos);
+    abstract public function parse($input, array $pos);
 
     /**
      * Alternative composition of two parsers.
@@ -36,7 +36,7 @@ abstract class Parser
      */
     public function alt(Parser $other)
     {
-        return new FuncParser(function (array $input, array $pos) use ($other) {
+        return new FuncParser(function ($input, array $pos) use ($other) {
             $result = $this->parse($input, $pos);
             if ($result->successful) {
                 return $result;
@@ -57,7 +57,7 @@ abstract class Parser
      */
     public function map(callable $f)
     {
-        return new FuncParser(function (array $input, array $pos) use ($f) {
+        return new FuncParser(function ($input, array $pos) use ($f) {
             $result = $this->parse($input, $pos);
             if (! $result->successful) {
                 return $result;
@@ -79,7 +79,7 @@ abstract class Parser
      */
     public function seq(Parser $other)
     {
-        return new FuncParser(function (array $input, array $pos) use ($other) {
+        return new FuncParser(function ($input, array $pos) use ($other) {
             $a = $this->parse($input, $pos);
             if (! $a->successful) {
                 return $a;
@@ -113,7 +113,7 @@ abstract class Parser
      */
     public function seqL(Parser $other)
     {
-        return new FuncParser(function (array $input, array $pos) use ($other) {
+        return new FuncParser(function ($input, array $pos) use ($other) {
             $a = $this->parse($input, $pos);
             if (! $a->successful) {
                 return $a;
@@ -139,7 +139,7 @@ abstract class Parser
      */
     public function seqR(Parser $other)
     {
-        return new FuncParser(function (array $input, array $pos) use ($other) {
+        return new FuncParser(function ($input, array $pos) use ($other) {
             $a = $this->parse($input, $pos);
             if (! $a->successful) {
                 return $a;
@@ -164,7 +164,7 @@ abstract class Parser
      */
     public function withFailure($message)
     {
-        return new FuncParser(function (array $input, array $pos) use ($message) {
+        return new FuncParser(function ($input, array $pos) use ($message) {
             $r = $this->parse($input, $pos);
             if ($r->successful) {
                 return $r;
@@ -185,7 +185,7 @@ abstract class Parser
      */
     public function withResult($result)
     {
-        return new FuncParser(function (array $input, array $pos) use ($result) {
+        return new FuncParser(function ($input, array $pos) use ($result) {
             $r = $this->parse($input, $pos);
             if (! $r->successful) {
                 return $r;

@@ -13,6 +13,9 @@ use Parco\Positional;
 
 /**
  * A collection of generic parser combinators.
+ *
+ * A user of this trait should define an input sequence type by implementing
+ * the {@see atEnd}, {@see head}, and {@see tail} methods.
  */
 trait Parsers
 {
@@ -23,6 +26,39 @@ trait Parsers
     private $parserCache = array();
 
     /**
+     * Whether the given input sequence is empty.
+     *
+     * @param mixed $input
+     *            The input sequence.
+     * @return bool True if empty, false otherwise.
+     */
+    abstract protected function atEnd($input);
+
+    /**
+     * Get the first element of the given input sequence.
+     *
+     * @param mixed $input
+     *            The input sequence
+     * @return mixed The first element of the input sequence.
+     */
+    abstract protected function head($input);
+
+    /**
+     * Remove the first element of the given input sequence and advance the
+     * position counter.
+     *
+     * @param mixed $input
+     *            The input sequence.
+     * @param array $pos
+     *            Current position as a 2-element array consisting of a line
+     *            number and a column number.
+     * @return array A two-element array consisting of the remaining input
+     *         sequence and the position of the first element in the remaining
+     *         input sequence.
+     */
+    abstract protected function tail($input, array $pos);
+
+    /**
      * Lazily fetch a parser.
      *
      * @param string $name
@@ -31,7 +67,7 @@ trait Parsers
      */
     public function __get($name)
     {
-        return new FuncParser(function (array $input, array $pos) use ($name) {
+        return new FuncParser(function ($input, array $pos) use ($name) {
             if (! isset($this->parserCache[$name])) {
                 $this->parserCache[$name] = $this->$name();
             }
@@ -51,8 +87,8 @@ trait Parsers
      */
     public function elem($e)
     {
-        return new FuncParser(function (array $input, array $pos) use ($e) {
-            if (! count($input)) {
+        return new FuncParser(function ($input, array $pos) use ($e) {
+            if ($this->atEnd($input)) {
                 return new Failure(
                     'unexpected end of input, expected "' . $e . '"',
                     $pos,
@@ -60,22 +96,16 @@ trait Parsers
                     $pos
                 );
             }
-            if ($input[0] != $e) {
+            $head = $this->head($input);
+            if ($head != $e) {
                 return new Failure(
-                    'unexpected "' . $input[0] . '", expected "' . $e . '"',
+                    'unexpected "' . $head . '", expected "' . $e . '"',
                     $pos,
                     $input,
                     $pos
                 );
             }
-            $input = array_slice($input, 1);
-            $nextPos = $pos;
-            if ($e === "\n") {
-                $nextPos[0]++;
-                $nextPos[1] = 1;
-            } else {
-                $nextPos[1]++;
-            }
+            list($input, $nextPos) = $this->tail($input, $pos);
             return new Success($e, $pos, $input, $nextPos);
         });
     }
@@ -92,14 +122,14 @@ trait Parsers
      */
     public function phrase(Parser $p)
     {
-        return new FuncParser(function (array $input, array $pos) use ($p) {
+        return new FuncParser(function ($input, array $pos) use ($p) {
             $r = $p->parse($input, $pos);
             if (! $r->successful) {
                 return $r;
             }
-            if (count($r->nextInput)) {
+            if (! $this->atEnd($r->nextInput)) {
                 return new Failure(
-                    'unexpected "' . $r->nextInput[0] . '", expected end of input',
+                    'unexpected "' . $this->head($r->nextInput) . '", expected end of input',
                     $r->nextPos,
                     $r->nextInput,
                     $r->nextPos
@@ -121,7 +151,7 @@ trait Parsers
      */
     public function positioned(Parser $p)
     {
-        return new FuncParser(function (array $input, array $pos) use ($p) {
+        return new FuncParser(function ($input, array $pos) use ($p) {
             $r = $p->parse($input, $pos);
             if ($r->successful) {
                 $r->get()->setPosition($pos);
@@ -142,7 +172,7 @@ trait Parsers
      */
     public function opt(Parser $p)
     {
-        return new FuncParser(function (array $input, array $pos) use ($p) {
+        return new FuncParser(function ($input, array $pos) use ($p) {
             $r = $p->parse($input, $pos);
             if ($r->successful) {
                 return $r;
@@ -163,7 +193,7 @@ trait Parsers
      */
     public function not(Parser $p)
     {
-        return new FuncParser(function (array $input, array $pos) use ($p) {
+        return new FuncParser(function ($input, array $pos) use ($p) {
             $r = $p->parse($input, $pos);
             if ($r->successful) {
                 return new Failure(null, $pos, $input, $pos);
@@ -184,7 +214,7 @@ trait Parsers
      */
     public function rep(Parser $p)
     {
-        return new FuncParser(function (array $input, array $pos) use ($p) {
+        return new FuncParser(function ($input, array $pos) use ($p) {
             $list = array();
             $nextPos = $pos;
             while (true) {
@@ -216,7 +246,7 @@ trait Parsers
      */
     public function repsep(Parser $p, Parser $sep)
     {
-        return new FuncParser(function (array $input, array $pos) use ($p, $sep) {
+        return new FuncParser(function ($input, array $pos) use ($p, $sep) {
             $list = array();
             $r = $p->parse($input, $pos);
             if (! $r->successful) {
@@ -255,7 +285,7 @@ trait Parsers
      */
     public function rep1(Parser $p)
     {
-        return new FuncParser(function (array $input, array $pos) use ($p) {
+        return new FuncParser(function ($input, array $pos) use ($p) {
             $list = array();
             $nextPos = $pos;
             do {
@@ -290,7 +320,7 @@ trait Parsers
      */
     public function rep1sep(Parser $p, Parser $sep)
     {
-        return new FuncParser(function (array $input, array $pos) use ($p, $sep) {
+        return new FuncParser(function ($input, array $pos) use ($p, $sep) {
             $list = array();
             $r = $p->parse($input, $pos);
             if (! $r->successful) {
@@ -331,7 +361,7 @@ trait Parsers
      */
     public function repN($num, Parser $p)
     {
-        return new FuncParser(function (array $input, array $pos) use ($num, $p) {
+        return new FuncParser(function ($input, array $pos) use ($num, $p) {
             $list = array();
             $nextPos = $pos;
             for ($i = 0; $i < $num; $i++) {
@@ -368,7 +398,7 @@ trait Parsers
     public function seq(Parser $p, Parser $q)
     {
         $parsers = func_get_args();
-        return new FuncParser(function (array $input, array $pos) use ($parsers) {
+        return new FuncParser(function ($input, array $pos) use ($parsers) {
             $list = array();
             $nextPos = $pos;
             foreach ($parsers as $p) {
@@ -405,7 +435,7 @@ trait Parsers
     public function alt(Parser $p, Parser $q)
     {
         $parsers = func_get_args();
-        return new FuncParser(function (array $input, array $pos) use ($parsers) {
+        return new FuncParser(function ($input, array $pos) use ($parsers) {
             foreach ($parsers as $p) {
                 $r = $p->parse($input, $pos);
                 if ($r->successful) {
@@ -427,7 +457,7 @@ trait Parsers
      */
     public function success($result)
     {
-        return new FuncParser(function (array $input, array $pos) use ($result) {
+        return new FuncParser(function ($input, array $pos) use ($result) {
             return new Success($result, $pos, $input, $pos);
         });
     }
@@ -441,7 +471,7 @@ trait Parsers
      */
     public function failure($message)
     {
-        return new FuncParser(function (array $input, array $pos) use ($message) {
+        return new FuncParser(function ($input, array $pos) use ($message) {
             return new Failure($message, $pos, $input, $pos);
         });
     }
@@ -458,7 +488,7 @@ trait Parsers
      */
     public function chainl(Parser $p, Parser $sep)
     {
-        return new FuncParser(function (array $input, array $pos) use ($p, $sep) {
+        return new FuncParser(function ($input, array $pos) use ($p, $sep) {
             $r = $p->parse($input, $pos);
             if (! $r->successful) {
                 return $r;
@@ -497,7 +527,7 @@ trait Parsers
      */
     public function chainr(Parser $p, Parser $sep)
     {
-        return new FuncParser(function (array $input, array $pos) use ($p, $sep) {
+        return new FuncParser(function ($input, array $pos) use ($p, $sep) {
             $r = $p->parse($input, $pos);
             if (! $r->successful) {
                 return $r;

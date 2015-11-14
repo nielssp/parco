@@ -5,7 +5,7 @@ use Parco\TestCase;
 
 class ParsersTest extends TestCase
 {
-    use Parsers;
+    use RegexParsers;
     
     private $called = 0;
     

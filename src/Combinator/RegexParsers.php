@@ -14,6 +14,8 @@ use Parco\Match;
 /**
  * A collection of parser combinators for string/character parsing using
  * regular expressions.
+ *
+ * This trait defines an input sequence as an array of characters.
  */
 trait RegexParsers
 {
@@ -26,6 +28,38 @@ trait RegexParsers
      * @var bool $skipWhitespace
      */
     protected $skipWhitespace = true;
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function atEnd($input)
+    {
+        return count($input) == 0;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function head($input)
+    {
+        return $input[0];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function tail($input, array $pos)
+    {
+        $head = $input[0];
+        $tail = array_slice($input, 1);
+        if ($head === "\n") {
+            $pos[0]++;
+            $pos[1] = 1;
+        } else {
+            $pos[1]++;
+        }
+        return array($tail, $pos);
+    }
 
     /**
      * Use a character parser to parse a string.
@@ -75,7 +109,7 @@ trait RegexParsers
     public function whitespace()
     {
         if (! isset($this->parserCache['@ws'])) {
-            $this->parserCache['@ws'] = new FuncParser(function (array $input, array $pos) {
+            $this->parserCache['@ws'] = new FuncParser(function ($input, array $pos) {
                 $i = 0;
                 $nextPos = $pos;
                 while (true) {
@@ -135,7 +169,7 @@ trait RegexParsers
      */
     public function string($s)
     {
-        return new FuncParser(function (array $input, array $pos) use ($s) {
+        return new FuncParser(function ($input, array $pos) use ($s) {
             if ($this->skipWhitespace) {
                 $r = $this->whitespace()->parse($input, $pos);
                 $input = $r->nextInput;
@@ -183,7 +217,7 @@ trait RegexParsers
      */
     public function regex($regex)
     {
-        return new FuncParser(function (array $input, array $pos) use ($regex) {
+        return new FuncParser(function ($input, array $pos) use ($regex) {
             if ($this->skipWhitespace) {
                 $r = $this->whitespace()->parse($input, $pos);
                 $input = $r->nextInput;
@@ -217,7 +251,7 @@ trait RegexParsers
      */
     public function group($i, Parser $p)
     {
-        return new FuncParser(function (array $input, array $pos) use ($i, $p) {
+        return new FuncParser(function ($input, array $pos) use ($i, $p) {
             $r = $p->parse($input, $pos);
             if (! $r->successful) {
                 return $r;

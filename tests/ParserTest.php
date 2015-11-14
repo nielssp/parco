@@ -1,11 +1,11 @@
 <?php
 namespace Parco;
 
-use Parco\Combinator\Parsers;
+use Parco\Combinator\RegexParsers;
 
 class ParserTest extends TestCase
 {
-    use Parsers;
+    use RegexParsers;
 
     public function testAlt()
     {
