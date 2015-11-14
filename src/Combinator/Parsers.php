@@ -57,6 +57,15 @@ trait Parsers
      *         input sequence.
      */
     abstract protected function tail($input, array $pos);
+    
+    /**
+     * Convert an input sequence element to a string.
+     *
+     * @param mixed $element
+     *            An input sequence element.
+     * @return string String representation of element.
+     */
+    abstract protected function show($element);
 
     /**
      * Lazily fetch a parser.
@@ -90,7 +99,7 @@ trait Parsers
         return new FuncParser(function ($input, array $pos) use ($e) {
             if ($this->atEnd($input)) {
                 return new Failure(
-                    'unexpected end of input, expected "' . $e . '"',
+                    'unexpected end of input, expected ' . $this->show($e),
                     $pos,
                     $input,
                     $pos
@@ -99,7 +108,7 @@ trait Parsers
             $head = $this->head($input);
             if ($head != $e) {
                 return new Failure(
-                    'unexpected "' . $head . '", expected "' . $e . '"',
+                    'unexpected ' . $this->show($head) . ', expected ' . $this->show($e),
                     $pos,
                     $input,
                     $pos
@@ -129,7 +138,7 @@ trait Parsers
             }
             if (! $this->atEnd($r->nextInput)) {
                 return new Failure(
-                    'unexpected "' . $this->head($r->nextInput) . '", expected end of input',
+                    'unexpected ' . $this->show($this->head($r->nextInput)) . ', expected end of input',
                     $r->nextPos,
                     $r->nextInput,
                     $r->nextPos

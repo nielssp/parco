@@ -62,6 +62,14 @@ trait RegexParsers
     }
 
     /**
+     * {@inheritdoc}
+     */
+    protected function show($element)
+    {
+        return '"' . $element . '"';
+    }
+
+    /**
      * Use a character parser to parse a string.
      *
      * @param  Parser $p
@@ -180,7 +188,7 @@ trait RegexParsers
             for ($i = 0; $i < $length; $i++) {
                 if (! isset($input[$i])) {
                     return new Failure(
-                        'unexpected end of input, expected "' . $s[$i] . '"',
+                        'unexpected end of input, expected ' . $this->show($s[$i]),
                         $pos,
                         $input,
                         $pos
@@ -188,7 +196,7 @@ trait RegexParsers
                 }
                 if ($input[$i] != $s[$i]) {
                     return new Failure(
-                        'unexpected "' . $input[$i] . '", expected "' . $s[$i] . '"',
+                        'unexpected ' . $this->show($input[$i]) . ', expected ' . $this->show($s[$i]),
                         $pos,
                         $input,
                         $pos
@@ -228,7 +236,7 @@ trait RegexParsers
                 if (! count($input)) {
                     return new Failure('unexpected end of input', $pos, $input, $pos);
                 }
-                return new Failure('unexpected "' . $input[0] . '"', $pos, $input, $pos);
+                return new Failure('unexpected ' . $this->show($input[0]), $pos, $input, $pos);
             }
             $length = strlen($matches[0][0]);
             $input = array_slice($input, $length);
