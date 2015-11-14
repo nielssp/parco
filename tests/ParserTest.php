@@ -140,4 +140,20 @@ class ParserTest extends TestCase
         $this->assertFalse($result->successful);
         $this->assertEquals('error2', $result->message);
     }
+
+    public function testWithResult()
+    {
+        $p1 = $this->success(1);
+        $p2 = $this->failure('error1');
+
+        $c1 = $p1->withResult(2);
+        $result = $this->apply($c1);
+        $this->assertTrue($result->successful);
+        $this->assertEquals(2, $result->get());
+
+        $c2 = $p2->withResult(2);
+        $result = $this->apply($c2);
+        $this->assertFalse($result->successful);
+        $this->assertEquals('error1', $result->message);
+    }
 }

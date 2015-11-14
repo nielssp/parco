@@ -417,11 +417,12 @@ trait Parsers
             return $r;
         });
     }
-    
+
     /**
      * A parser that always succeeds.
      *
-     * @param  mixed $result Parse result.
+     * @param mixed $result
+     *            Parse result.
      * @return Parser A parser.
      */
     public function success($result)
@@ -430,17 +431,102 @@ trait Parsers
             return new Success($result, $pos, $input, $pos);
         });
     }
-    
+
     /**
      * A parser that always fails.
      *
-     * @param  string $message Failure message.
+     * @param string $message
+     *            Failure message.
      * @return Parser A parser.
      */
     public function failure($message)
     {
         return new FuncParser(function (array $input, array $pos) use ($message) {
             return new Failure($message, $pos, $input, $pos);
+        });
+    }
+
+    /**
+     * A parser for left-associative chaining.
+     *
+     * @param Parser $p
+     *            A parser.
+     * @param Parser $sep
+     *            A parser that parses the elements that separate the elements
+     *            parsed by `$p` and returns a left-associative function that
+     *            combines two elements returned by `$p`.
+     */
+    public function chainl(Parser $p, Parser $sep)
+    {
+        return new FuncParser(function (array $input, array $pos) use ($p, $sep) {
+            $r = $p->parse($input, $pos);
+            if (! $r->successful) {
+                return $r;
+            }
+            $leftOperand = $r->result;
+            $input = $r->nextInput;
+            $nextPos = $r->nextPos;
+            while (true) {
+                $s = $sep->parse($input, $nextPos);
+                if (! $s->successful) {
+                    break;
+                }
+                $r = $p->parse($s->nextInput, $s->nextPos);
+                if (! $r->successful) {
+                    break;
+                }
+                $f = $s->result;
+                $rightOperand = $r->result;
+                $leftOperand = call_user_func($f, $leftOperand, $rightOperand);
+                $input = $r->nextInput;
+                $nextPos = $r->nextPos;
+            }
+            return new Success($leftOperand, $pos, $input, $nextPos);
+        });
+    }
+
+    /**
+     * A parser for right-associative chaining.
+     *
+     * @param Parser $p
+     *            A parser.
+     * @param Parser $sep
+     *            A parser that parses the elements that separate the elements
+     *            parsed by `$p` and returns a right-associative function that
+     *            combines two elements returned by `$p`.
+     */
+    public function chainr(Parser $p, Parser $sep)
+    {
+        return new FuncParser(function (array $input, array $pos) use ($p, $sep) {
+            $r = $p->parse($input, $pos);
+            if (! $r->successful) {
+                return $r;
+            }
+            $ops = array(array($r->result, null));
+            $input = $r->nextInput;
+            $nextPos = $r->nextPos;
+            while (true) {
+                $s = $sep->parse($input, $nextPos);
+                if (! $s->successful) {
+                    break;
+                }
+                $r = $p->parse($s->nextInput, $s->nextPos);
+                if (! $r->successful) {
+                    break;
+                }
+                $f = $s->result;
+                $ops[] = array($r->result, $f);
+                $input = $r->nextInput;
+                $nextPos = $r->nextPos;
+            }
+            $length = count($ops);
+            $rightOperand = $ops[$length - 1][0];
+            for ($i = $length - 2; $i >= 0; $i--) {
+                $f = $ops[$i + 1][1];
+                $leftOperand = $ops[$i][0];
+                $rightOpreand = call_user_func($f, $leftOperand, $rightOperand);
+            }
+            return new Success($rightOperand, $pos, $input, $nextPos);
         });
     }
 }

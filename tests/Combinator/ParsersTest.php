@@ -290,4 +290,50 @@ class ParsersTest extends TestCase
         $this->assertFalse($result->successful);
         $this->assertEquals('error1', $result->message);
     }
+    
+    public function testChainl()
+    {
+        $p1 = $this->elem(1);
+        $p2 = $this->elem('-')->withResult(function ($left, $right) {
+            return $left - $right;
+        });
+        
+        $c1 = $this->chainl($p1, $p2);
+        $result = $this->apply($c1);
+        $this->assertFalse($result->successful);
+        $this->assertEquals('unexpected end of input, expected "1"', $result->message);
+
+        $result = $this->apply($c1, array(1, '-'));
+        $this->assertTrue($result->successful);
+        $this->assertEquals(1, $result->get());
+
+        $result = $this->apply($c1, array(1, '-', 1, '-', 1));
+        $this->assertTrue($result->successful);
+        $this->assertEquals(-1, $result->get());
+        $this->assertEquals(array(), $result->nextInput);
+        $this->assertEquals(array(1, 6), $result->nextPos);
+    }
+    
+    public function testChainr()
+    {
+        $p1 = $this->elem(1);
+        $p2 = $this->elem('-')->withResult(function ($left, $right) {
+            return $left - $right;
+        });
+        
+        $c1 = $this->chainr($p1, $p2);
+        $result = $this->apply($c1);
+        $this->assertFalse($result->successful);
+        $this->assertEquals('unexpected end of input, expected "1"', $result->message);
+
+        $result = $this->apply($c1, array(1, '-'));
+        $this->assertTrue($result->successful);
+        $this->assertEquals(1, $result->get());
+
+        $result = $this->apply($c1, array(1, '-', 1, '-', 1));
+        $this->assertTrue($result->successful);
+        $this->assertEquals(1, $result->get());
+        $this->assertEquals(array(), $result->nextInput);
+        $this->assertEquals(array(1, 6), $result->nextPos);
+    }
 }

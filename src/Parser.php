@@ -155,6 +155,9 @@ abstract class Parser
     /**
      * Change the failure message produced by this parser.
      *
+     * `$p->withFailure($m)` fails if `$p` fails, then replaces `$p`'s failure
+     * message with `$m` instead.
+     *
      * @param string $message
      *            The new failure message.
      * @return Parser A parser with the new failure message.
@@ -167,6 +170,27 @@ abstract class Parser
                 return $r;
             }
             return new Failure($message, $r->getPosition(), $r->nextInput, $r->nextPos);
+        });
+    }
+
+    /**
+     * Change the value returned by this parser.
+     *
+     * `$p->withResult($x)` succeeds if `$p` succeds, then discards `$p`'s
+     * result and returns `$x` instead.
+     *
+     * @param mixed $result
+     *            The new result.
+     * @return Parser A parser with the new result.
+     */
+    public function withResult($result)
+    {
+        return new FuncParser(function (array $input, array $pos) use ($result) {
+            $r = $this->parse($input, $pos);
+            if (! $r->successful) {
+                return $r;
+            }
+            return new Success($result, $r->getPosition(), $r->nextInput, $r->nextPos);
         });
     }
 }
