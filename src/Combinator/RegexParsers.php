@@ -110,7 +110,7 @@ trait RegexParsers
 
     /**
      * A parser that matches a regular expression string.
-     * 
+     *
      * The parser returns uses an instance of {@see Match} to store its result.
      *
      * @param  string $r
@@ -152,8 +152,9 @@ trait RegexParsers
     {
         return new FuncParser(function (array $input, array $pos) use ($i, $p) {
             $r = $p->parse($input, $pos);
-            if (! $r->successful)
+            if (! $r->successful) {
                 return $r;
+            }
             $group = $r->group($i);
             $offset = $r->offset($i);
             if (isset($offset)) {

@@ -94,7 +94,7 @@ class RegexParsersTest extends TestCase
     {
         $p1 = $this->regex('/a(b)?a+/');
         
-        $c1 = $this->group(1, $p1); 
+        $c1 = $this->group(1, $p1);
         $result = $this->parse($c1, '');
         $this->assertFalse($result->successful);
         $this->assertEquals('unexpected end of input', $result->message);
@@ -110,5 +110,4 @@ class RegexParsersTest extends TestCase
         $this->assertEquals(array(), $result->nextInput);
         $this->assertEquals(array(1, 4), $result->nextPos);
     }
-
 }
