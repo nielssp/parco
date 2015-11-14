@@ -160,13 +160,7 @@ trait Parsers
      */
     public function positioned(Parser $p)
     {
-        return new FuncParser(function ($input, array $pos) use ($p) {
-            $r = $p->parse($input, $pos);
-            if ($r->successful) {
-                $r->get()->setPosition($pos);
-            }
-            return $r;
-        });
+        return $p->positioned();
     }
 
     /**

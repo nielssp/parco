@@ -24,7 +24,7 @@ interface Positional
     /**
      * Set the stored position.
      *
-     * @param int[]
+     * @param int[] $pos
      *            Position as a 2-element array consisting of a line number and
      *            a column number.
      */

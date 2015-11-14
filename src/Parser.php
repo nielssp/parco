@@ -193,4 +193,23 @@ abstract class Parser
             return new Success($result, $r->getPosition(), $r->nextInput, $r->nextPos);
         });
     }
+    
+    /**
+     * Add position to result of parser.
+     *
+     * `$p->positioned()` adds the position of the first input to the result of
+     * `$p`. The result must implement {@see Positional}.
+     *
+     * @return Parser A positioned parser.
+     */
+    public function positioned()
+    {
+        return new FuncParser(function ($input, array $pos) {
+            $r = $this->parse($input, $pos);
+            if ($r->successful) {
+                $r->get()->setPosition($pos);
+            }
+            return $r;
+        });
+    }
 }

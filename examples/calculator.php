@@ -1,5 +1,6 @@
 <?php
 use Parco\Combinator\RegexParsers;
+use Parco\ParseException;
 
 include __DIR__ . '/../vendor/autoload.php';
 
@@ -87,19 +88,11 @@ class Calculator
     /**
      *
      * @return float
+     * @throws ParseException
      */
     public function __invoke($input)
     {
-        $result = $this->parseAll($this->expr(), $input);
-        if ($result->successful) {
-            return $result->get();
-        }
-        trigger_error(
-            'Parse error: ' . $result->message
-            . ' on line ' . $result->posLine()
-            . ' column ' . $result->posColumn(),
-            E_USER_ERROR
-        );
+        return $this->parseAll($this->expr(), $input)->get();
     }
 }
 
@@ -107,3 +100,4 @@ $calculator = new Calculator();
 
 echo 'Result: ';
 echo $calculator(' 2 + 4 / 2 - 3 * ( 6 - ( 5 + 3 ) ) ');
+
