@@ -30,11 +30,8 @@ class Calculator
      */
     public function factor()
     {
-        $expr = $this->elem('(')
-            ->seqR($this->expr)
-            ->seqL($this->elem(')'));
+        $expr = $this->elem('(')->seqR($this->expr)->seqL($this->elem(')'));
         return $expr->alt($this->number);
-        return $this->number;
     }
 
     /**
@@ -43,21 +40,21 @@ class Calculator
      */
     public function term()
     {
-        return $this->factor->seq($this->rep($this->alt($this->elem("*")
-            ->seq($this->factor), $this->elem("/")
-            ->seq($this->factor))))
-            ->map(function ($numbers) {
- // array(factor, array(array("*", factor), ...))
-                $x = $numbers[0];
-                foreach ($numbers[1] as $operation) {
-                    if ($operation[0] == "*") {
-                        $x *= $operation[1];
-                    } else {
-                        $x /= $operation[1];
-                    }
+        return $this->factor->seq($this->rep($this->alt(
+            $this->elem("*")->seq($this->factor),
+            $this->elem("/")->seq($this->factor)
+        )))->map(function ($numbers) {
+            // $numbers = array(factor, array(array("*", factor), ...))
+            $x = $numbers[0];
+            foreach ($numbers[1] as $operation) {
+                if ($operation[0] == "*") {
+                    $x *= $operation[1];
+                } else {
+                    $x /= $operation[1];
                 }
-                return $x;
-            });
+            }
+            return $x;
+        });
     }
 
     /**
@@ -66,21 +63,21 @@ class Calculator
      */
     public function expr()
     {
-        return $this->term->seq($this->rep($this->alt($this->elem("+")
-            ->seq($this->term), $this->elem("-")
-            ->seq($this->term))))
-            ->map(function ($numbers) {
- // array(term, array(array("+", term), ...))
-                $x = $numbers[0];
-                foreach ($numbers[1] as $operation) {
-                    if ($operation[0] == "+") {
-                        $x += $operation[1];
-                    } else {
-                        $x -= $operation[1];
-                    }
+        return $this->term->seq($this->rep($this->alt(
+            $this->elem("+")->seq($this->term),
+            $this->elem("-")->seq($this->term)
+        )))->map(function ($numbers) {
+            // $numbers = array(term, array(array("+", term), ...))
+            $x = $numbers[0];
+            foreach ($numbers[1] as $operation) {
+                if ($operation[0] == "+") {
+                    $x += $operation[1];
+                } else {
+                    $x -= $operation[1];
                 }
-                return $x;
-            });
+            }
+            return $x;
+        });
     }
 
     /**
