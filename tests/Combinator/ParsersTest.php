@@ -56,6 +56,14 @@ class ParsersTest extends TestCase
         $this->assertEquals(1, $result->get());
         $this->assertEquals(array(2), $result->nextInput);
         $this->assertEquals(array(1, 2), $result->nextPos);
+
+        $p2 = $this->elem("\n");
+        
+        $result = $this->apply($p2, array("\n"));
+        $this->assertTrue($result->successful);
+        $this->assertEquals("\n", $result->get());
+        $this->assertEquals(array(), $result->nextInput);
+        $this->assertEquals(array(2, 1), $result->nextPos);
     }
 
     public function testPhrase()

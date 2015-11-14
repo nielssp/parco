@@ -142,6 +142,7 @@ trait RegexParsers
                 $pos = $r->nextPos;
             }
             $length = strlen($s);
+            $nextPos = $pos;
             for ($i = 0; $i < $length; $i++) {
                 if (! isset($input[$i])) {
                     return new Failure(
@@ -159,10 +160,14 @@ trait RegexParsers
                         $pos
                     );
                 }
+                if ($input[$i] === "\n") {
+                    $nextPos[0]++;
+                    $nextPos[1] = 1;
+                } else {
+                    $nextPos[1]++;
+                }
             }
             $input = array_slice($input, $length);
-            $nextPos = $pos;
-            $nextPos[1] += $length;
             return new Success($s, $pos, $input, $nextPos);
         });
     }

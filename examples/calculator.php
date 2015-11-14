@@ -105,4 +105,5 @@ class Calculator
 
 $calculator = new Calculator();
 
-echo $calculator(' 2 + 4 / 2 - 3 * ( 6 + 2 ) ');
+echo 'Result: ';
+echo $calculator(' 2 + 4 / 2 - 3 * ( 6 - ( 5 + 3 ) ) ');

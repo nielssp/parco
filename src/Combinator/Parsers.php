@@ -70,7 +70,12 @@ trait Parsers
             }
             $input = array_slice($input, 1);
             $nextPos = $pos;
-            $nextPos[1]++;
+            if ($e === "\n") {
+                $nextPos[0]++;
+                $nextPos[1] = 1;
+            } else {
+                $nextPos[1]++;
+            }
             return new Success($e, $pos, $input, $nextPos);
         });
     }

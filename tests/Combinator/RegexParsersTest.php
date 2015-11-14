@@ -93,6 +93,14 @@ class RegexParsersTest extends TestCase
         $this->assertEquals('a', $result->get());
         $this->assertEquals(array('b'), $result->nextInput);
         $this->assertEquals(array(1, 2), $result->nextPos);
+        
+        $p2 = $this->char("\n");
+        
+        $result = $this->apply($p2, array("\n"));
+        $this->assertTrue($result->successful);
+        $this->assertEquals("\n", $result->get());
+        $this->assertEquals(array(), $result->nextInput);
+        $this->assertEquals(array(2, 1), $result->nextPos);
     }
     
     public function testString()
@@ -112,6 +120,14 @@ class RegexParsersTest extends TestCase
         $this->assertEquals('aaa', $result->get());
         $this->assertEquals(array(), $result->nextInput);
         $this->assertEquals(array(1, 4), $result->nextPos);
+
+        $p2 = $this->string("aa\na");
+        
+        $result = $this->parse($p2, "aa\na");
+        $this->assertTrue($result->successful);
+        $this->assertEquals("aa\na", $result->get());
+        $this->assertEquals(array(), $result->nextInput);
+        $this->assertEquals(array(2, 2), $result->nextPos);
     }
     
     public function testRegex()
