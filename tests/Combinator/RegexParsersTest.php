@@ -89,5 +89,4 @@ class RegexParsersTest extends TestCase
         $this->assertEquals(array(), $result->nextInput);
         $this->assertEquals(array(1, 7), $result->nextPos);
     }
-
 }

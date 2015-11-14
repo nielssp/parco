@@ -42,7 +42,7 @@ abstract class Result implements Positional
     
     /**
      * Next position.
-     * 
+     *
      * @var array
      */
     public $nextPos;
@@ -53,5 +53,5 @@ abstract class Result implements Positional
      * @throws ParseException If unsuccessful.
      * @return mixed Stored parse result.
      */
-    public abstract function get();
+    abstract public function get();
 }

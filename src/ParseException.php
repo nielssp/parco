@@ -8,16 +8,18 @@ namespace Parco;
 /**
  * A parse exception with positional information.
  */
-class ParseException extends \RuntimeException implements Positional {
+class ParseException extends \RuntimeException implements Positional
+{
     use Position;
     
     /**
      * Construct parse exception from a parse result.
-     * 
-     * @param Result $result Parse result.
+     *
+     * @param Result          $result   Parse result.
      * @param \Exception|null $previous Previous exception if any.
      */
-    public function __construct(Result $result, \Exception $previous = null) {
+    public function __construct(Result $result, \Exception $previous = null)
+    {
         parent::__construct($result->message, 0, $previous);
         $this->setPosition($result->getPosition());
     }

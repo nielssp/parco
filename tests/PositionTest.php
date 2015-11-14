@@ -3,6 +3,7 @@ namespace Parco;
 
 class PositionTest extends TestCase
 {
+
     public function testPosition()
     {
         $mock = $this->getMockForTrait('Parco\Position');

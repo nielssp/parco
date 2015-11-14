@@ -3,6 +3,7 @@ namespace Parco;
 
 class FailureTest extends TestCase
 {
+
     /**
      * @expectedException \Parco\ParseException
      * @expectedExceptionMessage test

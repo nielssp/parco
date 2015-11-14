@@ -11,26 +11,32 @@ use Parco\Success;
 use Parco\Failure;
 use Parco\Positional;
 
-
 /**
  * A collection of generic parser combinators.
  */
 trait Parsers
 {
-    private $parserCache = array();
     
     /**
-     * 
-     * 
-     * @param unknown $parser
-     * @return Parser A parser.
+     * @var Parser[]
      */
-    public function __get($parser)
+    private $parserCache = array();
+
+    /**
+     * Lazily fetch a parser.
+     *
+     * @param string $name
+     *            Name of parser method. Method must have zero parameters.
+     * @return Parser A lazy parser.
+     */
+    public function __get($name)
     {
-        if (!isset($this->parserCache[$parser])) {
-            $this->parserCache[$parser] = $this->$parser();
-        }
-        return $this->parserCache[$parser];
+        return new FuncParser(function (array $input, array $pos) use ($name) {
+            if (!isset($this->parserCache[$parser])) {
+                $this->parserCache[$parser] = $this->$parser();
+            }
+            return $this->parserCache[$parser]->parse($input, $pos);
+        });
     }
 
     /**
@@ -39,56 +45,67 @@ trait Parsers
      * `elem($e)` is a parser that succeeds if the first element in the input
      * is equal to `$e`.
      *
-     * @param mixed $e
+     * @param  mixed $e
      *            An element.
      * @return FuncParser An element parser.
      */
     public function elem($e)
     {
-        return new FuncParser(function (array $input, array $pos) use ($e) {
-            if (! count($input)) {
-                return new Failure(
-                    'unexpected end of input, expected "' . $e . '"',
-                    $pos, $input, $pos
-                );
+        return new FuncParser(
+            function (array $input, array $pos) use ($e) {
+                if (! count($input)) {
+                    return new Failure(
+                        'unexpected end of input, expected "' . $e . '"',
+                        $pos,
+                        $input,
+                        $pos
+                    );
+                }
+                if ($input[0] != $e) {
+                    return new Failure(
+                        'unexpected "' . $input[0] . '", expected "' . $e . '"',
+                        $pos,
+                        $input,
+                        $pos
+                    );
+                }
+                $input = array_slice($input, 1);
+                $nextPos = $pos;
+                $nextPos[1]++;
+                return new Success($e, $pos, $input, $nextPos);
             }
-            if ($input[0] != $e) {
-                return new Failure(
-                    'unexpected "' . $input[0] . '", expected "' . $e . '"',
-                    $pos, $input, $pos
-                );
-            }
-            $input = array_slice($input, 1);
-            $nextPos = $pos;
-            $nextPos[1]++;
-            return new Success($e, $pos, $input, $nextPos);
-        });
+        );
     }
 
     /**
      * A parser that parses the entire input.
      *
      * `phrase($p)` is a parser that succeeds if `$p` succeeds and no input
-     * remains. 
+     * remains.
      *
-     * @param Parser $p
+     * @param  Parser $p
      *            A parser.
      * @return FuncParser A phrase parser.
      */
     public function phrase(Parser $p)
     {
-        return new FuncParser(function (array $input, array $pos) use ($p) {
-            $r = $p->parse($input, $pos);
-            if (! $r->successful)
+        return new FuncParser(
+            function (array $input, array $pos) use ($p) {
+                $r = $p->parse($input, $pos);
+                if (! $r->successful) {
+                    return $r;
+                }
+                if (count($r->nextInput)) {
+                    return new Failure(
+                        'unexpected "' . $r->nextInput[0] . '", expected end of input',
+                        $r->nextPos,
+                        $r->nextInput,
+                        $r->nextPos
+                    );
+                }
                 return $r;
-            if (count($r->nextInput)) {
-                return new Failure(
-                    'unexpected "' . $r->nextInput[0] . '", expected end of input',
-                    $r->nextPos, $r->nextInput, $r->nextPos
-                );
             }
-            return $r;
-        });
+        );
     }
 
     /**
@@ -97,18 +114,21 @@ trait Parsers
      * `positioned($p)` adds the position of the first input to the result of
      * `$p`. The result must implement {@see Positional}.
      *
-     * @param Parser $p
+     * @param  Parser $p
      *            A parser.
      * @return FuncParser A positioned parser.
      */
     public function positioned(Parser $p)
     {
-        return new FuncParser(function (array $input, array $pos) use ($p) {
-            $r = $p->parse($input, $pos);
-            if ($r->successful)
-                $r->get()->setPosition($pos);
-            return $r;
-        });
+        return new FuncParser(
+            function (array $input, array $pos) use ($p) {
+                $r = $p->parse($input, $pos);
+                if ($r->successful) {
+                    $r->get()->setPosition($pos);
+                }
+                return $r;
+            }
+        );
     }
 
     /**
@@ -117,18 +137,21 @@ trait Parsers
      * `opt($p)` is a parser that always succeeds and returns `$x` if `$p`
      * returns `$x` and `null` if `$p` fails.
      *
-     * @param Parser $p
+     * @param  Parser $p
      *            A parser.
      * @return FuncParser An optional parser.
      */
     public function opt(Parser $p)
     {
-        return new FuncParser(function (array $input, array $pos) use ($p) {
-            $r = $p->parse($input, $pos);
-            if ($r->successful)
-                return $r;
-            return new Success(null, $pos, $input, $pos);
-        });
+        return new FuncParser(
+            function (array $input, array $pos) use ($p) {
+                $r = $p->parse($input, $pos);
+                if ($r->successful) {
+                    return $r;
+                }
+                return new Success(null, $pos, $input, $pos);
+            }
+        );
     }
 
     /**
@@ -137,18 +160,21 @@ trait Parsers
      * `not($p)` is a parser that fails if `$p` succeeds and succeeds if `$p`
      * fails. It never consumes any input.
      *
-     * @param Parser $p
+     * @param  Parser $p
      *            A parser.
      * @return FuncParser A negating parser.
      */
     public function not(Parser $p)
     {
-        return new FuncParser(function (array $input, array $pos) use ($p) {
-            $r = $p->parse($input, $pos);
-            if ($r->successful)
-                return new Failure(null, $pos, $input, $pos);
-            return new Success(null, $pos, $input, $pos);
-        });
+        return new FuncParser(
+            function (array $input, array $pos) use ($p) {
+                $r = $p->parse($input, $pos);
+                if ($r->successful) {
+                    return new Failure(null, $pos, $input, $pos);
+                }
+                return new Success(null, $pos, $input, $pos);
+            }
+        );
     }
 
     /**
@@ -157,25 +183,28 @@ trait Parsers
      * `rep($p)` is a parser that repeatedly uses `$p` to parse the input until
      * `$p` fails. The result is an array of all results.
      *
-     * @param Parser $p
+     * @param  Parser $p
      *            A parser.
      * @return FuncParser A repetition parser.
      */
     public function rep(Parser $p)
     {
-        return new FuncParser(function (array $input, array $pos) use ($p) {
-            $list = array();
-            $nextPos = $pos;
-            while (true) {
-                $r = $p->parse($input, $nextPos);
-                if (! $r->successful)
-                    break;
-                $list[] = $r->result;
-                $input = $r->nextInput;
-                $nextPos = $r->nextPos;
+        return new FuncParser(
+            function (array $input, array $pos) use ($p) {
+                $list = array();
+                $nextPos = $pos;
+                while (true) {
+                    $r = $p->parse($input, $nextPos);
+                    if (! $r->successful) {
+                        break;
+                    }
+                    $list[] = $r->result;
+                    $input = $r->nextInput;
+                    $nextPos = $r->nextPos;
+                }
+                return new Success($list, $pos, $input, $nextPos);
             }
-            return new Success($list, $pos, $input, $nextPos);
-        });
+        );
     }
 
     /**
@@ -185,36 +214,41 @@ trait Parsers
      * `$sep` to parse the input until `$p` fails. The result is an array of all
      * results of `$p`.
      *
-     * @param Parser $p
+     * @param  Parser $p
      *            A parser.
-     * @param Parser $sep
+     * @param  Parser $sep
      *            A parser that parses the elements that separate the elements
      *            parsed by `$p`.
      * @return FuncParser A repetition parser.
      */
     public function repsep(Parser $p, Parser $sep)
     {
-        return new FuncParser(function (array $input, array $pos) use ($p, $sep) {
-            $list = array();
-            $r = $p->parse($input, $pos);
-            if (! $r->successful)
-                return new Success($list, $pos, $input, $pos);
-            $list[] = $r->result;
-            $input = $r->nextInput;
-            $nextPos = $r->nextPos;
-            while (true) {
-                $s = $sep->parse($input, $nextPos);
-                if (! $s->successful)
-                    break;
-                $r = $p->parse($s->nextInput, $s->nextPos);
-                if (! $r->successful)
-                    break;
+        return new FuncParser(
+            function (array $input, array $pos) use ($p, $sep) {
+                $list = array();
+                $r = $p->parse($input, $pos);
+                if (! $r->successful) {
+                    return new Success($list, $pos, $input, $pos);
+                }
                 $list[] = $r->result;
                 $input = $r->nextInput;
                 $nextPos = $r->nextPos;
+                while (true) {
+                    $s = $sep->parse($input, $nextPos);
+                    if (! $s->successful) {
+                        break;
+                    }
+                    $r = $p->parse($s->nextInput, $s->nextPos);
+                    if (! $r->successful) {
+                        break;
+                    }
+                    $list[] = $r->result;
+                    $input = $r->nextInput;
+                    $nextPos = $r->nextPos;
+                }
+                return new Success($list, $pos, $input, $nextPos);
             }
-            return new Success($list, $pos, $input, $nextPos);
-        });
+        );
     }
 
     /**
@@ -224,28 +258,31 @@ trait Parsers
      * `$p` fails. It fails if the first use of `$p` fails. The result is an
      * array of all results.
      *
-     * @param Parser $p
+     * @param  Parser $p
      *            A parser.
      * @return FuncParser A repetition parser.
      */
     public function rep1(Parser $p)
     {
-        return new FuncParser(function (array $input, array $pos) use ($p) {
-            $list = array();
-            $nextPos = $pos;
-            do {
-                $r = $p->parse($input, $nextPos);
-                if (! $r->successful) {
-                    if (! count($list))
-                        return $r;
-                    break;
-                }
-                $list[] = $r->result;
-                $input = $r->nextInput;
-                $nextPos = $r->nextPos;
-            } while (true);
-            return new Success($list, $pos, $input, $nextPos);
-        });
+        return new FuncParser(
+            function (array $input, array $pos) use ($p) {
+                $list = array();
+                $nextPos = $pos;
+                do {
+                    $r = $p->parse($input, $nextPos);
+                    if (! $r->successful) {
+                        if (! count($list)) {
+                            return $r;
+                        }
+                        break;
+                    }
+                    $list[] = $r->result;
+                    $input = $r->nextInput;
+                    $nextPos = $r->nextPos;
+                } while (true);
+                return new Success($list, $pos, $input, $nextPos);
+            }
+        );
     }
 
     /**
@@ -255,36 +292,41 @@ trait Parsers
      * `$sep` to parse the input until `$p` fails. It fails if the first use of
      * `$p` fails. The result is an array of all results of `$p`.
      *
-     * @param Parser $p
+     * @param  Parser $p
      *            A parser.
-     * @param Parser $sep
+     * @param  Parser $sep
      *            A parser that parses the elements that separate the elements
      *            parsed by `$p`.
      * @return FuncParser A repetition parser.
      */
     public function rep1sep(Parser $p, Parser $sep)
     {
-        return new FuncParser(function (array $input, array $pos) use ($p, $sep) {
-            $list = array();
-            $r = $p->parse($input, $pos);
-            if (! $r->successful)
-                return $r;
-            $list[] = $r->result;
-            $input = $r->nextInput;
-            $nextPos = $r->nextPos;
-            while (true) {
-                $s = $sep->parse($input, $nextPos);
-                if (! $s->successful)
-                    break;
-                $r = $p->parse($s->nextInput, $s->nextPos);
-                if (! $r->successful)
-                    break;
+        return new FuncParser(
+            function (array $input, array $pos) use ($p, $sep) {
+                $list = array();
+                $r = $p->parse($input, $pos);
+                if (! $r->successful) {
+                    return $r;
+                }
                 $list[] = $r->result;
                 $input = $r->nextInput;
                 $nextPos = $r->nextPos;
+                while (true) {
+                    $s = $sep->parse($input, $nextPos);
+                    if (! $s->successful) {
+                        break;
+                    }
+                    $r = $p->parse($s->nextInput, $s->nextPos);
+                    if (! $r->successful) {
+                        break;
+                    }
+                    $list[] = $r->result;
+                    $input = $r->nextInput;
+                    $nextPos = $r->nextPos;
+                }
+                return new Success($list, $pos, $input, $nextPos);
             }
-            return new Success($list, $pos, $input, $nextPos);
-        });
+        );
     }
 
     /**
@@ -294,27 +336,30 @@ trait Parsers
      * times. It fails if any of the uses of `$p` fails. The result is an array
      * of all results.
      *
-     * @param int $num
+     * @param  int    $num
      *            Number of repetitions.
-     * @param Parser $p
+     * @param  Parser $p
      *            A parser.
      * @return FuncParser A repetition parser.
      */
     public function repN($num, Parser $p)
     {
-        return new FuncParser(function (array $input, array $pos) use ($num, $p) {
-            $list = array();
-            $nextPos = $pos;
-            for ($i = 0; $i < $num; $i++) {
-                $r = $p->parse($input, $nextPos);
-                if (! $r->successful)
-                    return $r;
-                $list[] = $r->result;
-                $input = $r->nextInput;
-                $nextPos = $r->nextPos;
+        return new FuncParser(
+            function (array $input, array $pos) use ($num, $p) {
+                $list = array();
+                $nextPos = $pos;
+                for ($i = 0; $i < $num; $i++) {
+                    $r = $p->parse($input, $nextPos);
+                    if (! $r->successful) {
+                        return $r;
+                    }
+                    $list[] = $r->result;
+                    $input = $r->nextInput;
+                    $nextPos = $r->nextPos;
+                }
+                return new Success($list, $pos, $input, $nextPos);
             }
-            return new Success($list, $pos, $input, $nextPos);
-        });
+        );
     }
 
     /**
@@ -327,30 +372,33 @@ trait Parsers
      * Additional parameters are accepted such that:
      * `seq($p, $q, $r) = seq($p, seq($q, $r))`.
      *
-     * @param Parser $p
+     * @param  Parser $p
      *            First parser.
-     * @param Parser $q
+     * @param  Parser $q
      *            Second parser.
-     * @param Parser $r,...
+     * @param  Parser $r,...
      *            Any additional parsers.
      * @return FuncParser A sequential composition of the input parsers.
      */
     public function seq(Parser $p, Parser $q)
     {
         $parsers = func_get_args();
-        return new FuncParser(function (array $input, array $pos) use ($parsers) {
-            $list = array();
-            $nextPos = $pos;
-            foreach ($parsers as $p) {
-                $r = $p->parse($input, $nextPos);
-                if (! $r->successful)
-                    return $r;
-                $list[] = $r->result;
-                $input = $r->nextInput;
-                $nextPos = $r->nextPos;
+        return new FuncParser(
+            function (array $input, array $pos) use ($parsers) {
+                $list = array();
+                $nextPos = $pos;
+                foreach ($parsers as $p) {
+                    $r = $p->parse($input, $nextPos);
+                    if (! $r->successful) {
+                        return $r;
+                    }
+                    $list[] = $r->result;
+                    $input = $r->nextInput;
+                    $nextPos = $r->nextPos;
+                }
+                return new Success($list, $pos, $input, $nextPos);
             }
-            return new Success($list, $pos, $input, $nextPos);
-        });
+        );
     }
 
     /**
@@ -363,50 +411,59 @@ trait Parsers
      * An arbitrary number of additional parameters are accepted such that:
      * `alt($p, $q, $r) = alt($p, alt($q, $r))`.
      *
-     * @param Parser $p
+     * @param  Parser $p
      *            First parser.
-     * @param Parser $q
+     * @param  Parser $q
      *            Second parser.
-     * @param Parser $r,...
+     * @param  Parser $r,...
      *            Any additional parsers.
      * @return FuncParser An alternative composition of the input parsers.
      */
     public function alt(Parser $p, Parser $q)
     {
         $parsers = func_get_args();
-        return new FuncParser(function (array $input, array $pos) use ($parsers) {
-            foreach ($parsers as $p) {
-                $r = $p->parse($input, $pos);
-                if ($r->successful)
-                    return $r;
-                $input = $r->nextInput;
-                $pos = $r->nextPos;
+        return new FuncParser(
+            function (array $input, array $pos) use ($parsers) {
+                foreach ($parsers as $p) {
+                    $r = $p->parse($input, $pos);
+                    if ($r->successful) {
+                        return $r;
+                    }
+                    $input = $r->nextInput;
+                    $pos = $r->nextPos;
+                }
+                return $r;
             }
-            return $r;
-        });
+        );
     }
     
     /**
      * A parser that always succeeds.
-     * 
-     * @param mixed $result Parse result.
+     *
+     * @param  mixed $result Parse result.
      * @return FuncParser A parser.
      */
-    public function success($result) {
-        return new FuncParser(function (array $input, array $pos) use ($result) {
-            return new Success($result, $pos, $input, $pos);
-        });
+    public function success($result)
+    {
+        return new FuncParser(
+            function (array $input, array $pos) use ($result) {
+                return new Success($result, $pos, $input, $pos);
+            }
+        );
     }
     
     /**
      * A parser that always fails.
-     * 
-     * @param string $message Failure message.
+     *
+     * @param  string $message Failure message.
      * @return FuncParser A parser.
      */
-    public function failure($message) {
-        return new FuncParser(function (array $input, array $pos) use ($message) {
-            return new Failure($message, $pos, $input, $pos);
-        });
+    public function failure($message)
+    {
+        return new FuncParser(
+            function (array $input, array $pos) use ($message) {
+                return new Failure($message, $pos, $input, $pos);
+            }
+        );
     }
 }

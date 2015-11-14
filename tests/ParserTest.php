@@ -19,7 +19,6 @@ class ParserTest extends TestCase
         $this->assertTrue($result->successful);
         $this->assertEquals(1, $result->get());
         
-        
         $c2 = $p1->alt($p3);
         $result = $this->apply($c2);
         $this->assertTrue($result->successful);
@@ -36,11 +35,15 @@ class ParserTest extends TestCase
         $this->assertEquals('error2', $result->message);
     }
     
-    public function testMap() {
+    public function testMap()
+    {
         $p1 = $this->success(1);
         $p2 = $this->failure('error1');
         
-        $f = function($x) { return $x + 4; };
+        $f = function ($x) {
+            return $x + 4;
+
+        };
         
         $m1 = $p1->map($f);
         $result = $this->apply($m1);

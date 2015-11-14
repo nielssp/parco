@@ -16,11 +16,11 @@ class Failure extends Result
      *
      * @param string $message
      *            Failure message.
-     * @param int[] $pos
+     * @param int[]  $pos
      *            Failure position.
-     * @param array $nextInput
+     * @param array  $nextInput
      *            Remaining input.
-     * @param int[] $nextPos
+     * @param int[]  $nextPos
      *            Next position.
      */
     public function __construct($message, array $pos, array $nextInput, array $nextPos)
