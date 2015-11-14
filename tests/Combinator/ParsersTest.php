@@ -65,6 +65,37 @@ class ParsersTest extends TestCase
         $this->assertEquals(array(), $result->nextInput);
         $this->assertEquals(array(2, 1), $result->nextPos);
     }
+    
+    public function testAcceptIf()
+    {
+        $p1 = $this->acceptIf(function ($elem) {
+            return $elem == 1;
+        });
+        $p2 = $this->acceptIf(function ($elem) {
+            return $elem == 1;
+        }, function ($elem) {
+            return $elem . ' is not acceptable';
+        });
+        
+        $result = $this->apply($p1, array());
+        $this->assertFalse($result->successful);
+        $this->assertEquals('unexpected end of input', $result->message);
+        
+        $result = $this->apply($p1, array(2));
+        $this->assertFalse($result->successful);
+        $this->assertEquals('unexpected "2"', $result->message);
+        
+        $result = $this->apply($p2, array(2));
+        $this->assertFalse($result->successful);
+        $this->assertEquals('2 is not acceptable', $result->message);
+        
+        $result = $this->apply($p1, array(1, 2));
+        $this->assertTrue($result->successful);
+        $this->assertEquals(1, $result->get());
+        $this->assertEquals(array(2), $result->nextInput);
+        $this->assertEquals(array(1, 2), $result->nextPos);
+        
+    }
 
     public function testPhrase()
     {

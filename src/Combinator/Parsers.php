@@ -120,6 +120,39 @@ trait Parsers
     }
 
     /**
+     * A parser that accepts input using a predicate.
+     *
+     * `acceptIf($f)` is a parser that succeeds if `$f($x) = true`, where `$x`
+     * is the first element in the input. The second parameter is optional and
+     * can be used to customize the failure message.
+     *
+     * @param callable $predicate
+     *            A predicate function.
+     * @param callable|null $failure
+     *            A function that converts a failing input to a failure message.
+     * @return Parser A parser.
+     */
+    public function acceptIf(callable $predicate, $failure = null)
+    {
+        return new FuncParser(function ($input, array $pos) use ($predicate, $failure) {
+            if ($this->atEnd($input)) {
+                return new Failure('unexpected end of input', $pos, $input, $pos);
+            }
+            $head = $this->head($input);
+            if (! call_user_func($predicate, $head)) {
+                if (isset($failure)) {
+                    $message = call_user_func($failure, $head);
+                } else {
+                    $message = 'unexpected ' . $this->show($head);
+                }
+                return new Failure($message, $pos, $input, $pos);
+            }
+            list($input, $nextPos) = $this->tail($input, $pos);
+            return new Success($head, $pos, $input, $nextPos);
+        });
+    }
+
+    /**
      * A parser that parses the entire input.
      *
      * `phrase($p)` is a parser that succeeds if `$p` succeeds and no input

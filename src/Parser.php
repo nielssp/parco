@@ -88,15 +88,10 @@ abstract class Parser
             if (! $b->successful) {
                 return $b;
             }
-            return new Success(
-                array(
+            return new Success(array(
                 $a->result,
                 $b->result
-                ),
-                $pos,
-                $b->nextInput,
-                $b->nextPos
-            );
+            ), $pos, $b->nextInput, $b->nextPos);
         });
     }
 

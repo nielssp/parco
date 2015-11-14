@@ -142,10 +142,10 @@ $lexer = new Lexer();
 
 echo '<pre>';
 
-echo 'Result: ' . PHP_EOL;
 $input = 'let x = 5 in \y -> x + y ';
 try {
     $tokens = $lexer($input);
+    echo 'Tokens:' . PHP_EOL;
     foreach ($tokens as $token)
         echo ' ' . $token;
 } catch (\Parco\ParseException $e) {
