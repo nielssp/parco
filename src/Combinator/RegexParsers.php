@@ -147,6 +147,13 @@ trait RegexParsers
         return $this->parserCache['@ws'];
     }
     
+    /**
+     * A parser that temporarily sets {@see $skipWhitespace} to false.
+     *
+     * @param Parser $p
+     *            A parser.
+     * @return \Parco\FuncParser A parser that doesn't skip whitespace.
+     */
     public function noSkip(Parser $p)
     {
         return new FuncParser(function ($input, array $pos) use ($p) {
