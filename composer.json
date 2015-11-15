@@ -3,7 +3,7 @@
   "description": "PHP parser combinators library.",
   "license": "MIT",
   "type": "library",
-  "homepage": "http://nielssp.dk",
+  "homepage": "http://parco.nielssp.dk",
   "keywords": ["parsing"],
   "authors": [
     {
