@@ -1,5 +1,7 @@
 # Parco – PHP parser combinators
 
+[![Build Status](https://travis-ci.org/nielssp/parco.svg?branch=master)](https://travis-ci.org/nielssp/parco) [![Coverage Status](https://coveralls.io/repos/nielssp/parco/badge.svg?branch=master&service=github)](https://coveralls.io/github/nielssp/parco?branch=master)
+
 Parco is an experimental parser combinator library for PHP inspired by [Scala Parser Combinators](https://github.com/scala/scala-parser-combinators). See also [Wikipedia](https://en.wikipedia.org/wiki/Parser_combinator) for general information on parser combinators.
 
 The API documentation is available on [parco.nielssp.dk/api](http://parco.nielssp.dk/api).
