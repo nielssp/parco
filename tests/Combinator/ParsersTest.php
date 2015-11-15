@@ -189,9 +189,12 @@ class ParsersTest extends TestCase
         $this->assertTrue($result->successful);
         $this->assertEquals(array(), $result->get());
 
-        $result = $this->apply($c1, array(1, 2));
+        $result = $this->apply($c1, array(1));
         $this->assertTrue($result->successful);
         $this->assertEquals(array(1), $result->get());
+
+        $result = $this->apply($c1, array(1, 2));
+        $this->assertFalse($result->successful);
 
         $result = $this->apply($c1, array(1, 2, 1, 2, 1));
         $this->assertTrue($result->successful);
@@ -227,8 +230,8 @@ class ParsersTest extends TestCase
         $this->assertEquals('unexpected end of input, expected "1"', $result->message);
 
         $result = $this->apply($c1, array(1, 2));
-        $this->assertTrue($result->successful);
-        $this->assertEquals(array(1), $result->get());
+        $this->assertFalse($result->successful);
+        $this->assertEquals('unexpected end of input, expected "1"', $result->message);
 
         $result = $this->apply($c1, array(1, 2, 1, 2, 1));
         $this->assertTrue($result->successful);
@@ -303,7 +306,7 @@ class ParsersTest extends TestCase
         $c4 = $this->alt($p3, $p4);
         $result = $this->apply($c4);
         $this->assertFalse($result->successful);
-        $this->assertEquals('error2', $result->message);
+        $this->assertEquals('error1', $result->message);
     }
 
     public function testSuccess()

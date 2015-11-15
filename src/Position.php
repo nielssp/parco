@@ -57,4 +57,23 @@ trait Position
     {
         return $this->pos[1];
     }
+
+    /**
+     * Compare two positions.
+     *
+     * @param int[] $a
+     *            First position.
+     * @param int[] $b
+     *            Second position.
+     * @return int 0 if the two positions are equal, a negative integer if
+     *         `$b` is greater than `$a`, and a positive integer if `$a` is
+     *         greater than `$b`.
+     */
+    public static function comparePositions(array $a, array $b)
+    {
+        if ($a[0] == $b[0]) {
+            return $a[1] - $b[1];
+        }
+        return $a[0] - $b[0];
+    }
 }

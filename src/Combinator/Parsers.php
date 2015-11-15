@@ -10,6 +10,7 @@ use Parco\FuncParser;
 use Parco\Success;
 use Parco\Failure;
 use Parco\Positional;
+use Parco\Result;
 
 /**
  * A collection of generic parser combinators.
@@ -298,7 +299,7 @@ trait Parsers
                 }
                 $r = $p->parse($s->nextInput, $s->nextPos);
                 if (! $r->successful) {
-                    break;
+                    return $r;
                 }
                 $list[] = $r->result;
                 $input = $r->nextInput;
@@ -372,7 +373,7 @@ trait Parsers
                 }
                 $r = $p->parse($s->nextInput, $s->nextPos);
                 if (! $r->successful) {
-                    break;
+                    return $r;
                 }
                 $list[] = $r->result;
                 $input = $r->nextInput;
@@ -472,15 +473,20 @@ trait Parsers
     {
         $parsers = func_get_args();
         return new FuncParser(function ($input, array $pos) use ($parsers) {
+            $longest = null;
             foreach ($parsers as $p) {
                 $r = $p->parse($input, $pos);
                 if ($r->successful) {
                     return $r;
+                } else {
+                    if (! isset($longest) or Result::comparePositions($r->nextPos, $longest->nextPos) > 0) {
+                        $longest = $r;
+                    }
                 }
                 $input = $r->nextInput;
                 $pos = $r->nextPos;
             }
-            return $r;
+            return $longest;
         });
     }
 
