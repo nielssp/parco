@@ -64,6 +64,15 @@ class ParsersTest extends TestCase
         $this->assertEquals("\n", $result->get());
         $this->assertEquals(array(), $result->nextInput);
         $this->assertEquals(array(2, 1), $result->nextPos);
+        
+        $result = $this->apply($p1, array('1'));
+        $this->assertFalse($result->successful);
+
+        $p3 = $this->elem(1, false);
+        
+        $result = $this->apply($p3, array('1'));
+        $this->assertTrue($result->successful);
+        $this->assertEquals(1, $result->get());
     }
     
     public function testAcceptIf()

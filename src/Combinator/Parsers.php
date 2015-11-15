@@ -16,7 +16,7 @@ use Parco\Result;
  * A collection of generic parser combinators.
  *
  * A user of this trait should define an input sequence type by implementing
- * the {@see atEnd}, {@see head}, and {@see tail} methods.
+ * the {@see atEnd}, {@see head}, {@see tail}, and  {@see show} methods.
  */
 trait Parsers
 {
@@ -60,7 +60,8 @@ trait Parsers
     abstract protected function tail($input, array $pos);
     
     /**
-     * Convert an input sequence element to a string.
+     * Convert an input sequence element to a string for use in failure
+     * messages.
      *
      * @param mixed $element
      *            An input sequence element.
@@ -91,13 +92,15 @@ trait Parsers
      * `elem($e)` is a parser that succeeds if the first element in the input
      * is equal to `$e`.
      *
-     * @param  mixed $e
+     * @param mixed $e
      *            An element.
+     * @param bool $strict
+     *            If true, `===` will be used for comparison instead of `==`.
      * @return Parser An element parser.
      */
-    public function elem($e)
+    public function elem($e, $strict = true)
     {
-        return new FuncParser(function ($input, array $pos) use ($e) {
+        return new FuncParser(function ($input, array $pos) use ($e, $strict) {
             if ($this->atEnd($input)) {
                 return new Failure(
                     'unexpected end of input, expected ' . $this->show($e),
@@ -107,7 +110,8 @@ trait Parsers
                 );
             }
             $head = $this->head($input);
-            if ($head != $e) {
+            $eq = $strict ? $head === $e : $head == $e;
+            if (! $eq) {
                 return new Failure(
                     'unexpected ' . $this->show($head) . ', expected ' . $this->show($e),
                     $pos,

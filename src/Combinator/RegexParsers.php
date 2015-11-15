@@ -192,7 +192,7 @@ trait RegexParsers
                 );
             }
             $head = $this->head($input);
-            if ($head != $c) {
+            if ($head !== $c) {
                 return new Failure(
                     'unexpected ' . $this->show($head) . ', expected ' . $this->show($c),
                     $pos,
@@ -234,7 +234,7 @@ trait RegexParsers
                         $pos
                     );
                 }
-                if ($input[$i] != $s[$i]) {
+                if ($input[$i] !== $s[$i]) {
                     return new Failure(
                         'unexpected ' . $this->show($input[$i]) . ', expected ' . $this->show($s[$i]),
                         $pos,

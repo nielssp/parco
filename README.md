@@ -1,6 +1,6 @@
 # Parco – PHP parser combinators
 
-Parco is an experimental parser combinator library for PHP inspired by [Scala Parser Combinators](https://github.com/scala/scala-parser-combinators).
+Parco is an experimental parser combinators library for PHP inspired by [Scala Parser Combinators](https://github.com/scala/scala-parser-combinators).
 
 ## Install
 Requirements:
