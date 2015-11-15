@@ -74,6 +74,24 @@ class RegexParsersTest extends TestCase
         $this->assertEquals(array(2, 2), $result->nextPos);
     }
     
+    public function testNoSkip()
+    {
+        $this->skipWhitespace = true;
+        
+        $p1 = $this->char('a');
+        
+        $result = $this->parse($p1, ' a');
+        $this->assertTrue($result->successful);
+        $this->assertEquals('a', $result->get());
+        $this->assertEquals(array(), $result->nextInput);
+        $this->assertEquals(array(1, 3), $result->nextPos);
+        
+        $p2 = $this->noSkip($p1);
+
+        $result = $this->parse($p2, ' a');
+        $this->assertFalse($result->successful);
+    }
+    
     public function testChar()
     {
         $this->skipWhitespace = false;

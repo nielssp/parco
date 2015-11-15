@@ -147,6 +147,17 @@ trait RegexParsers
         return $this->parserCache['@ws'];
     }
     
+    public function noSkip(Parser $p)
+    {
+        return new FuncParser(function ($input, array $pos) use ($p) {
+            $skip = $this->skipWhitespace;
+            $this->skipWhitespace = false;
+            $r = $p->parse($input, $pos);
+            $this->skipWhitespace = $skip;
+            return $r;
+        });
+    }
+    
     /**
      * A parser that accepts only the given character.
      *
@@ -159,10 +170,32 @@ trait RegexParsers
      */
     public function char($c)
     {
-        if ($this->skipWhitespace) {
-            return $this->whitespace()->seqR($this->elem($c));
-        }
-        return $this->elem($c);
+        return new FuncParser(function ($input, array $pos) use ($c) {
+            if ($this->skipWhitespace) {
+                $r = $this->whitespace()->parse($input, $pos);
+                $input = $r->nextInput;
+                $pos = $r->nextPos;
+            }
+            if ($this->atEnd($input)) {
+                return new Failure(
+                    'unexpected end of input, expected ' . $this->show($c),
+                    $pos,
+                    $input,
+                    $pos
+                );
+            }
+            $head = $this->head($input);
+            if ($head != $c) {
+                return new Failure(
+                    'unexpected ' . $this->show($head) . ', expected ' . $this->show($c),
+                    $pos,
+                    $input,
+                    $pos
+                );
+            }
+            list($input, $nextPos) = $this->tail($input, $pos);
+            return new Success($c, $pos, $input, $nextPos);
+        });
     }
 
     /**
