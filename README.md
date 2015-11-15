@@ -1,6 +1,6 @@
 # Parco – PHP parser combinators
 
-[![Build Status](https://travis-ci.org/nielssp/parco.svg?branch=master)](https://travis-ci.org/nielssp/parco) [![Coverage Status](https://coveralls.io/repos/nielssp/parco/badge.svg?branch=master&service=github)](https://coveralls.io/github/nielssp/parco?branch=master)
+[![Build Status](https://travis-ci.org/nielssp/parco.svg?branch=master)](https://travis-ci.org/nielssp/parco) [![Coverage Status](https://coveralls.io/repos/nielssp/parco/badge.svg?branch=master&service=github)](https://coveralls.io/github/nielssp/parco?branch=master) [![Latest Stable Version](https://poser.pugx.org/nielssp/parco/v/stable)](https://packagist.org/packages/nielssp/parco)
 
 Parco is an experimental parser combinator library for PHP inspired by [Scala Parser Combinators](https://github.com/scala/scala-parser-combinators). See also [Wikipedia](https://en.wikipedia.org/wiki/Parser_combinator) for general information on parser combinators.
 
@@ -26,7 +26,7 @@ See the `examples` directory for some examples:
 
 ### Writing a parser
 
-To write a parser using Parco simply use on of the combinator traits in a class. There are currently three traits:
+To write a parser using Parco simply use one of the combinator traits in a class. There are currently three traits:
 
 * [Parsers](http://parco.nielssp.dk/api/class-Parco.Combinator.Parsers.html) for generic parser combinators (the user must provide an input sequence implementation),
 * [RegexParsers](http://parco.nielssp.dk/api/class-Parco.Combinator.RegexParsers.html) (extends `Parsers`) for parsing strings, and
@@ -103,7 +103,7 @@ The follwing parsers can be used to parse one or more input sequence elements:
 
 ```php
 $this->elem('a') // exact element
-$this->acceptIf(function ($elem) { return $elem instanceof NumberToken; })) // predicate
+$this->acceptIf(function ($elem) { return $elem instanceof NumberToken; }) // predicate
 $this->char('a') // character (RegexParsers)
 $this->string('goto') // string (RegexParsers)
 ```
