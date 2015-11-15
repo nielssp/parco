@@ -243,6 +243,8 @@ try {
     print_r($ast);
 } catch (\Parco\ParseException $e) {
     echo 'Syntax Error: ' . $e->getMessage() . ' on line ' . $e->line() . ' column ' . $e->column() . PHP_EOL;
+    echo $input . PHP_EOL;
+    echo str_repeat('-', $e->column() - 1) . '^';
 }
 
 echo '</pre>';

@@ -257,7 +257,7 @@ trait RegexParsers
     /**
      * A parser that matches a regular expression string.
      *
-     * The parser returns uses an instance of {@see Match} to store its result.
+     * The parser returns an instance of {@see Match} to store its result.
      *
      * @param  string $regex
      *            A regular expression, see {@see preg_match}.
