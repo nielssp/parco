@@ -12,7 +12,7 @@ before_script:
   - composer self-update
   - composer install --prefer-dist --no-interaction
 
-  - composer require --dev satooshi/php-coveralls:dev-master; fi
+  - composer require --dev satooshi/php-coveralls:dev-master
   - mkdir -p build/logs; fi"
 
   - phpenv rehash
