@@ -16,6 +16,7 @@ composer require nielssp/parco
 ## Usage
 
 See the `examples` directory for some examples:
+
 * `calculator.php` is a simple calculator made using `RegexParsers` based on [this example in the Scala Parser Combinators documentation](http://www.scala-lang.org/files/archive/api/2.11.2/scala-parser-combinators/#scala.util.parsing.combinator.RegexParsers).
 * `json.php` is a JSON parser using `RegexParsers`.
 * `lexer.php` is a lexer/scanner for a small expression language based on the &lambda;-calculus.
@@ -24,6 +25,7 @@ See the `examples` directory for some examples:
 ### Writing a parser
 
 To write a parser using Parco simply use on of the combinator traits in a class. There are currently three traits:
+
 * [Parsers](http://parco.nielssp.dk/api/class-Parco.Combinator.Parsers.html) for generic parser combinators (the user must provide an input sequence implementation),
 * [RegexParsers](http://parco.nielssp.dk/api/class-Parco.Combinator.RegexParsers.html) (extends `Parsers`) for parsing strings, and
 * [PositionalParsers](http://parco.nielssp.dk/api/class-Parco.Combinator.PositionalParsers.html) (extends `Parsers`) for parsing arrays of objects that implement the `Positional` interface (e.g. a list of tokens from a lexer).
