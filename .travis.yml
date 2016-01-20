@@ -6,19 +6,27 @@ php:
   - 7.0
   - hhvm
 
+matrix:
+  include:
+    - php: 7.0
+      env: COVERALLS=1
+    
+    - php: 7.0
+      env: PHPCS=1
+
 
 before_script:
   - composer self-update
   - composer install --prefer-dist --no-interaction
 
-  - composer require --dev satooshi/php-coveralls:dev-master
-  - mkdir -p build/logs
+  - if [[ "$COVERALLS" != "1" ]]; then composer require --dev satooshi/php-coveralls:dev-master; fi
+  - if [[ "$COVERALLS" != "1" ]]; then mkdir -p build/logs; fi
 
   - phpenv rehash
 
 script:
-  - vendor/bin/phpcs -p --standard=PSR2 ./src ./tests
+  - if [[ "$PHPCS" == "1" ]]; then vendor/bin/phpcs -p --standard=PSR2 ./src ./tests; fi
 
-  - phpunit
-
-  - vendor/bin/coveralls -v
+  - if [[ "$COVERALLS" != "1" ]]; then  phpunit; fi
+  - if [[ "$COVERALLS" == "1" ]]; then  phpunit; fi
+  - if [[ "$COVERALLS" == "1" ]]; then  vendor/bin/coveralls -v; fi
