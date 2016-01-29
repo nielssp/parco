@@ -63,7 +63,7 @@ class ParsersTest extends TestCase
         $this->assertTrue($result->successful);
         $this->assertEquals("\n", $result->get());
         $this->assertEquals(array(), $result->nextInput);
-        $this->assertEquals(array(2, 1), $result->nextPos);
+        $this->assertEquals(array(-1, -1), $result->nextPos);
         
         $result = $this->apply($p1, array('1'));
         $this->assertFalse($result->successful);
@@ -125,7 +125,7 @@ class ParsersTest extends TestCase
         $this->assertTrue($result->successful);
         $this->assertEquals(1, $result->get());
         $this->assertEquals(array(), $result->nextInput);
-        $this->assertEquals(array(1, 2), $result->nextPos);
+        $this->assertEquals(array(-1, -1), $result->nextPos);
     }
 
     public function testPositioned()
@@ -185,7 +185,7 @@ class ParsersTest extends TestCase
         $this->assertTrue($result->successful);
         $this->assertEquals(array(1, 1, 1), $result->get());
         $this->assertEquals(array(), $result->nextInput);
-        $this->assertEquals(array(1, 4), $result->nextPos);
+        $this->assertEquals(array(-1, -1), $result->nextPos);
     }
     
     public function testRepsep()
@@ -209,7 +209,7 @@ class ParsersTest extends TestCase
         $this->assertTrue($result->successful);
         $this->assertEquals(array(1, 1, 1), $result->get());
         $this->assertEquals(array(), $result->nextInput);
-        $this->assertEquals(array(1, 6), $result->nextPos);
+        $this->assertEquals(array(-1, -1), $result->nextPos);
     }
     
     public function testRep1()
@@ -225,7 +225,7 @@ class ParsersTest extends TestCase
         $this->assertTrue($result->successful);
         $this->assertEquals(array(1, 1, 1), $result->get());
         $this->assertEquals(array(), $result->nextInput);
-        $this->assertEquals(array(1, 4), $result->nextPos);
+        $this->assertEquals(array(-1, -1), $result->nextPos);
     }
     
     public function testRep1sep()
@@ -246,7 +246,7 @@ class ParsersTest extends TestCase
         $this->assertTrue($result->successful);
         $this->assertEquals(array(1, 1, 1), $result->get());
         $this->assertEquals(array(), $result->nextInput);
-        $this->assertEquals(array(1, 6), $result->nextPos);
+        $this->assertEquals(array(-1, -1), $result->nextPos);
     }
 
     public function testRepn()
@@ -354,7 +354,7 @@ class ParsersTest extends TestCase
         $this->assertTrue($result->successful);
         $this->assertEquals(-1, $result->get());
         $this->assertEquals(array(), $result->nextInput);
-        $this->assertEquals(array(1, 6), $result->nextPos);
+        $this->assertEquals(array(-1, -1), $result->nextPos);
     }
     
     public function testChainr()
@@ -377,6 +377,6 @@ class ParsersTest extends TestCase
         $this->assertTrue($result->successful);
         $this->assertEquals(1, $result->get());
         $this->assertEquals(array(), $result->nextInput);
-        $this->assertEquals(array(1, 6), $result->nextPos);
+        $this->assertEquals(array(-1, -1), $result->nextPos);
     }
 }

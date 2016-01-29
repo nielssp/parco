@@ -13,7 +13,8 @@ matrix:
     
     - php: 7.0
       env: PHPCS=1
-
+  allow_failures:
+    - env: COVERALLS=1
 
 before_script:
   - composer self-update
@@ -27,6 +28,6 @@ before_script:
 script:
   - if [[ "$PHPCS" == "1" ]]; then vendor/bin/phpcs -p --standard=PSR2 ./src ./tests; fi
 
-  - phpunit
+  - if [[ "$PHPCS" != "1" ]]; then phpunit; fi
 
-  - if [[ "$COVERALLS" == "1" ]]; then  vendor/bin/coveralls -v; fi
+  - if [[ "$COVERALLS" == "1" ]]; then vendor/bin/coveralls -v; fi

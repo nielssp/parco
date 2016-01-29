@@ -18,7 +18,7 @@ abstract class Parser
      *            Input sequence.
      * @param  int[] $pos
      *            Current position as a 2-element array consisting of a line
-     *            number and a column number.
+     *            number and a column number. See {@see Positional}.
      * @return Result Parser result.
      */
     abstract public function parse($input, array $pos);

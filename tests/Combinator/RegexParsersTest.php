@@ -16,6 +16,14 @@ class RegexParsersTest extends TestCase
         $this->assertEquals(array('a', 'a'), $result->get());
         $this->assertEquals(array('b'), $result->nextInput);
         $this->assertEquals(array(1, 3), $result->nextPos);
+        
+        $p2 = $this->noSkip($this->rep($this->char("\n")));
+
+        $result = $this->parse($p2, "\n\nb");
+        $this->assertTrue($result->successful);
+        $this->assertEquals(array("\n", "\n"), $result->get());
+        $this->assertEquals(array('b'), $result->nextInput);
+        $this->assertEquals(array(3, 1), $result->nextPos);
     }
     
     public function testParseAll()
@@ -36,7 +44,7 @@ class RegexParsersTest extends TestCase
         $this->assertTrue($result->successful);
         $this->assertEquals(array('a', 'a'), $result->get());
         $this->assertEquals(array(), $result->nextInput);
-        $this->assertEquals(array(1, 3), $result->nextPos);
+        $this->assertEquals(array(-1, -1), $result->nextPos);
 
         $this->skipWhitespace = true;
         
@@ -44,7 +52,7 @@ class RegexParsersTest extends TestCase
         $this->assertTrue($result->successful);
         $this->assertEquals(array('a', 'a'), $result->get());
         $this->assertEquals(array(), $result->nextInput);
-        $this->assertEquals(array(1, 4), $result->nextPos);
+        $this->assertEquals(array(-1, -1), $result->nextPos);
     }
     
     public function testWhitespace()
@@ -59,7 +67,7 @@ class RegexParsersTest extends TestCase
         $this->assertTrue($result->successful);
         $this->assertEquals(null, $result->get());
         $this->assertEquals(array(), $result->nextInput);
-        $this->assertEquals(array(2, 5), $result->nextPos);
+        $this->assertEquals(array(-1, -1), $result->nextPos);
 
         $result = $this->parse($p1, " \t a");
         $this->assertTrue($result->successful);
@@ -84,7 +92,7 @@ class RegexParsersTest extends TestCase
         $this->assertTrue($result->successful);
         $this->assertEquals('a', $result->get());
         $this->assertEquals(array(), $result->nextInput);
-        $this->assertEquals(array(1, 3), $result->nextPos);
+        $this->assertEquals(array(-1, -1), $result->nextPos);
         
         $p2 = $this->noSkip($p1);
 
@@ -118,7 +126,7 @@ class RegexParsersTest extends TestCase
         $this->assertTrue($result->successful);
         $this->assertEquals("\n", $result->get());
         $this->assertEquals(array(), $result->nextInput);
-        $this->assertEquals(array(2, 1), $result->nextPos);
+        $this->assertEquals(array(-1, -1), $result->nextPos);
     }
     
     public function testString()
@@ -137,7 +145,7 @@ class RegexParsersTest extends TestCase
         $this->assertTrue($result->successful);
         $this->assertEquals('aaa', $result->get());
         $this->assertEquals(array(), $result->nextInput);
-        $this->assertEquals(array(1, 4), $result->nextPos);
+        $this->assertEquals(array(-1, -1), $result->nextPos);
 
         $p2 = $this->string("aa\na");
         
@@ -145,7 +153,7 @@ class RegexParsersTest extends TestCase
         $this->assertTrue($result->successful);
         $this->assertEquals("aa\na", $result->get());
         $this->assertEquals(array(), $result->nextInput);
-        $this->assertEquals(array(2, 2), $result->nextPos);
+        $this->assertEquals(array(-1, -1), $result->nextPos);
     }
     
     public function testRegex()
@@ -166,7 +174,7 @@ class RegexParsersTest extends TestCase
         $this->assertTrue($result->successful);
         $this->assertEquals('aabbaa', $result->get());
         $this->assertEquals(array(), $result->nextInput);
-        $this->assertEquals(array(1, 7), $result->nextPos);
+        $this->assertEquals(array(-1, -1), $result->nextPos);
     }
     
     public function testGroup()
@@ -187,6 +195,6 @@ class RegexParsersTest extends TestCase
         $this->assertEquals('b', $result->get());
         $this->assertEquals(array(1, 2), $result->getPosition());
         $this->assertEquals(array(), $result->nextInput);
-        $this->assertEquals(array(1, 4), $result->nextPos);
+        $this->assertEquals(array(-1, -1), $result->nextPos);
     }
 }

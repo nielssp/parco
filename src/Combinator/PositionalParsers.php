@@ -40,6 +40,8 @@ trait PositionalParsers
         $tail = array_slice($input, 1);
         if (isset($tail[0])) {
             $pos = $tail[0]->getPosition();
+        } else {
+            $pos = array(-1, -1);
         }
         return array($tail, $pos);
     }

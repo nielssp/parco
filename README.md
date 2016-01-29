@@ -220,12 +220,16 @@ An example of a parser error handler:
 ```php
 $result = $myParser($input);
 if (! $result->successful) {
+    $lines = explode("\n", $json);
+    $line = $result->getInputLine($lines);
+    $column = $result->getInputColumn($lines);
     echo 'Syntax Error: ' . $result->message
-        . ' on line ' . $result->line()
-        . ' column ' . $result->column() . PHP_EOL;
-    $lines = explode("\n", $input);
-    echo $lines[$result->line() - 1] . PHP_EOL;
-    echo str_repeat('-', $result->column() - 1) . '^';
+        . ' on line ' . $line
+        . ' column ' . $column . PHP_EOL;
+    if ($line > 0) {
+        echo $lines[$line - 1] . PHP_EOL;
+        echo str_repeat('-', $column - 1) . '^';
+    }
 }
 ```
 Which produces output such as:

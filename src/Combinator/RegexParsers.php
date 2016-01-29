@@ -52,7 +52,9 @@ trait RegexParsers
     {
         $head = $input[0];
         $tail = array_slice($input, 1);
-        if ($head === "\n") {
+        if (! isset($tail[0])) {
+            $pos = array(-1, -1);
+        } elseif ($head === "\n") {
             $pos[0]++;
             $pos[1] = 1;
         } else {
@@ -122,7 +124,7 @@ trait RegexParsers
                 $nextPos = $pos;
                 while (true) {
                     if (! isset($input[$i])) {
-                        return new Success(null, $pos, array(), $nextPos);
+                        return new Success(null, $pos, array(), array(-1, -1));
                     }
                     switch ($input[$i]) {
                         case "\x0A":
@@ -138,6 +140,9 @@ trait RegexParsers
                             break;
                         default:
                             $input = array_slice($input, $i);
+                            if (! count($input)) {
+                                $nextPos = array(-1, -1);
+                            }
                             return new Success(null, $pos, $input, $nextPos);
                     }
                     $i++;
@@ -250,6 +255,9 @@ trait RegexParsers
                 }
             }
             $input = array_slice($input, $length);
+            if (! count($input)) {
+                $nextPos = array(-1, -1);
+            }
             return new Success($s, $pos, $input, $nextPos);
         });
     }
@@ -282,6 +290,9 @@ trait RegexParsers
             $input = array_slice($input, $length);
             $nextPos = $pos;
             $nextPos[1] += $length;
+            if (! count($input)) {
+                $nextPos = array(-1, -1);
+            }
             return new Match($matches, $pos, $input, $nextPos);
         });
     }
@@ -308,6 +319,9 @@ trait RegexParsers
             $offset = $r->offset($i);
             if (isset($offset)) {
                 $pos[1] += $offset;
+            }
+            if (! count($input)) {
+                $nextPos = array(-1, -1);
             }
             return new Success($group, $pos, $r->nextInput, $r->nextPos);
         });

@@ -52,10 +52,12 @@ trait Parsers
      *            The input sequence.
      * @param array $pos
      *            Current position as a 2-element array consisting of a line
-     *            number and a column number.
+     *            number and a column number. See {@see Positional}.
      * @return array A two-element array consisting of the remaining input
      *         sequence and the position of the first element in the remaining
-     *         input sequence.
+     *         input sequence. If the remaining input sequence is empty, the
+     *         position returned should be `array(-1, -1)`. See
+     *         {@see Positional}.
      */
     abstract protected function tail($input, array $pos);
     
