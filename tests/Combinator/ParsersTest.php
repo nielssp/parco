@@ -359,7 +359,7 @@ class ParsersTest extends TestCase
     
     public function testChainr()
     {
-        $p1 = $this->elem(1);
+        $p1 = $this->acceptIf('is_int');
         $p2 = $this->elem('-')->withResult(function ($left, $right) {
             return $left - $right;
         });
@@ -367,15 +367,15 @@ class ParsersTest extends TestCase
         $c1 = $this->chainr($p1, $p2);
         $result = $this->apply($c1);
         $this->assertFalse($result->successful);
-        $this->assertEquals('unexpected end of input, expected "1"', $result->message);
+        $this->assertEquals('unexpected end of input', $result->message);
 
         $result = $this->apply($c1, array(1, '-'));
         $this->assertTrue($result->successful);
         $this->assertEquals(1, $result->get());
 
-        $result = $this->apply($c1, array(1, '-', 1, '-', 1));
+        $result = $this->apply($c1, array(5, '-', 2, '-', 1));
         $this->assertTrue($result->successful);
-        $this->assertEquals(1, $result->get());
+        $this->assertEquals(4, $result->get());
         $this->assertEquals(array(), $result->nextInput);
         $this->assertEquals(array(-1, -1), $result->nextPos);
     }

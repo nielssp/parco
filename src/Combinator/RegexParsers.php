@@ -320,9 +320,6 @@ trait RegexParsers
             if (isset($offset)) {
                 $pos[1] += $offset;
             }
-            if (! count($input)) {
-                $nextPos = array(-1, -1);
-            }
             return new Success($group, $pos, $r->nextInput, $r->nextPos);
         });
     }

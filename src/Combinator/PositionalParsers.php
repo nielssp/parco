@@ -36,7 +36,6 @@ trait PositionalParsers
      */
     protected function tail($input, array $pos)
     {
-        $head = $input[0];
         $tail = array_slice($input, 1);
         if (isset($tail[0])) {
             $pos = $tail[0]->getPosition();

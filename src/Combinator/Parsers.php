@@ -602,7 +602,7 @@ trait Parsers
             for ($i = $length - 2; $i >= 0; $i--) {
                 $f = $ops[$i + 1][1];
                 $leftOperand = $ops[$i][0];
-                $rightOpreand = call_user_func($f, $leftOperand, $rightOperand);
+                $rightOperand = call_user_func($f, $leftOperand, $rightOperand);
             }
             return new Success($rightOperand, $pos, $input, $nextPos);
         });
