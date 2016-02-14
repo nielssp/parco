@@ -220,7 +220,7 @@ An example of a parser error handler:
 ```php
 $result = $myParser($input);
 if (! $result->successful) {
-    $lines = explode("\n", $json);
+    $lines = explode("\n", $input);
     $line = $result->getInputLine($lines);
     $column = $result->getInputColumn($lines);
     echo 'Syntax Error: ' . $result->message
